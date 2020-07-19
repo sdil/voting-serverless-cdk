@@ -11,7 +11,15 @@ class VotingServerlessCdkStack(core.Stack):
     # - GET /
     # - POST /vote
     # - POST /vote/<id>
-
+    # DynamoDB tables:
+    # - vote
+    # - aggregated_vote
+    # DynamoDB Stream
+    # Lambda DynamoDB Stream worker consumer
+    # SQS queue
+    # SQS Lambda consumer
+    # AWS Cognito
+    # Route53 pointing to api.voting.com
 
 class VotingFrontendCdkStack(core.Stack):
     def __init__(self, scope: core.Construct, id: str, **kwargs) -> None:
