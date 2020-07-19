@@ -6,4 +6,20 @@ class VotingServerlessCdkStack(core.Stack):
     def __init__(self, scope: core.Construct, id: str, **kwargs) -> None:
         super().__init__(scope, id, **kwargs)
 
-        # The code that defines your stack goes here
+    # API Gateway
+    # Lambdas:
+    # - GET /vote/<id>
+    # - GET /
+    # - POST /vote
+    # - POST /vote/<id>
+
+
+
+class VotingFrontendCdkStack(core.Stack):
+
+    def __init__(self, scope: core.Construct, id: str, **kwargs) -> None:
+        super().__init__(scope, id, **kwargs)
+
+    # S3 Assets
+    # Cloudfront serving the frontend page
+    # Route53 pointing to www.voting.com
