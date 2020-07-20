@@ -3,6 +3,7 @@ import logging
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
+
 def get_votes():
     """
     Get most recent votes from aggregated-vote-db

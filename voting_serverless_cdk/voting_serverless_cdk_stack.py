@@ -1,6 +1,5 @@
 from aws_cdk import core
 from aws_cdk.aws_apigatewayv2 import (
-    Function,
     LambdaProxyIntegration,
     HttpApi,
     HttpMethod,
@@ -12,6 +11,9 @@ class VotingServerlessCdkStack(core.Stack):
     def __init__(self, scope: core.Construct, id: str, **kwargs) -> None:
         super().__init__(scope, id, **kwargs)
 
+        vote_api = HttpApi(self, "VoteHttpApi")
+
+        # Create Vote API
         create_vote_function = Function(
             self,
             "CreateVotePollLambda",
@@ -19,16 +21,10 @@ class VotingServerlessCdkStack(core.Stack):
             runtime=Runtime.PYTHON_3_8,
             code=lambda_code.asset("./backend"),
         )
-        create_vote_lambda_integration = LambdaProxyIntegration(
-            handler=create_vote_function
-        )
-
-        # Setup HTTP API Routes
-        vote_api = HttpApi(self, "VoteHttpApi")
         vote_api.add_routes(
             path="/vote",
             methods=[HttpMethod.POST],
-            integration=create_vote_lambda_integration,
+            integration=LambdaProxyIntegration(handler=create_vote_function),
         )
 
         # API Gateway (HTTP API)
