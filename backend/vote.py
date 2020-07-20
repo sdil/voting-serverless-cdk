@@ -1,3 +1,8 @@
+import logging
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+
 def get_votes():
     """
     Get most recent votes from aggregated-vote-db
@@ -12,15 +17,15 @@ def get_vote_by_id():
     pass
 
 
-def insert_new_vote():
+def insert_new_vote(event, context):
     """
-    Publish an message to SQS queue
+    Create a new voting poll
     """
-    pass
+    logger.info("test")
 
 
 def update_vote():
     """
-    Update vote count in vote-db table
+    Publish an message to SQS queue
     """
     pass

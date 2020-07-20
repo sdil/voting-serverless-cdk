@@ -14,7 +14,11 @@ setuptools.setup(
     author="author",
     package_dir={"": "voting_serverless_cdk"},
     packages=setuptools.find_packages(where="voting_serverless_cdk"),
-    install_requires=["aws-cdk.core==1.52.0",],
+    install_requires=[
+        "aws-cdk.core==1.52.0",
+        "aws-cdk.aws_lambda",
+        "aws-cdk.aws_apigatewayv2",
+    ],
     python_requires=">=3.6",
     classifiers=[
         "Development Status :: 4 - Beta",
