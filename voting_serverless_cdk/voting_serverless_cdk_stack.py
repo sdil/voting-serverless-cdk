@@ -1,21 +1,37 @@
+from aws_cdk.aws_sqs import Queue
 from aws_cdk import core
-from aws_cdk.aws_apigatewayv2 import (
-    LambdaProxyIntegration,
-    HttpApi,
-    HttpMethod,
-)
-from aws_cdk.aws_lambda import Function, Runtime, Code as lambda_code, StartingPosition
-from aws_cdk.aws_dynamodb import Table, Attribute, AttributeType, StreamViewType
-from aws_cdk.aws_lambda_event_sources import DynamoEventSource, SqsDlq
+from aws_cdk.aws_apigatewayv2 import HttpApi, HttpMethod, LambdaProxyIntegration
+from aws_cdk.aws_dynamodb import Attribute, AttributeType, StreamViewType, Table
+from aws_cdk.aws_lambda import Code as lambda_code
+from aws_cdk.aws_lambda import Function, Runtime, StartingPosition
+from aws_cdk.aws_lambda_event_sources import DynamoEventSource, SqsDlq, SqsEventSource
+from utils import api_lambda_function
+
+GET = HttpMethod.GET
+POST = HttpMethod.POST
+PYTHON_RUNTIME = Runtime.PYTHON_3_8
 
 
 class VotingServerlessCdkStack(core.Stack):
     def __init__(self, scope: core.Construct, id: str, **kwargs) -> None:
         super().__init__(scope, id, **kwargs)
 
-        # DynamoDB
-        # Poll Table
-        poll_table = Table(
+        self.poll_table = None
+        self.aggregated_vote_table = None
+        self.create_ddb_tables()
+
+        # AWS API Gateway HTTP API
+        vote_api = HttpApi(self, "VoteHttpApi")
+        self.create_api_endpoints(vote_api)
+
+        self.create_sqs_queue()
+
+        # AWS Cognito (Use Cognito Hosted UI)
+
+        # Route53 pointing to api.voting.com
+
+    def create_ddb_tables(self):
+        self.poll_table = Table(
             self,
             "PollTable",
             partition_key=Attribute(name="id", type=AttributeType.STRING),
@@ -24,8 +40,7 @@ class VotingServerlessCdkStack(core.Stack):
             stream=StreamViewType.NEW_IMAGE,
         )
 
-        # Aggregated Vote Table
-        aggregated_vote_table = Table(  # Revise this
+        self.aggregated_vote_table = Table(  # Revise this
             self,
             "AggregatedVoteTable",
             partition_key=Attribute(name="id", type=AttributeType.STRING),
@@ -33,105 +48,68 @@ class VotingServerlessCdkStack(core.Stack):
             write_capacity=5,
         )
 
-        # DynamoDB Lambda consumer worker
-        aggregate_votes_function = Function(
-            self,
-            "AggregateVotesLambda",
-            handler="ddb_stream.aggregate_vote_table",
-            runtime=Runtime.PYTHON_3_8,
-            code=lambda_code.asset("./backend"),
+        def setup_ddb_streams():
+
+            # DynamoDB Lambda consumer worker
+            aggregate_votes_function = Function(
+                self,
+                "AggregateVotesLambda",
+                handler="ddb_stream.aggregate_vote_table",
+                runtime=PYTHON_RUNTIME,
+                code=lambda_code.asset("./backend"),
+            )
+
+            # DynamoDB Stream (Lambda Event Source)
+            self.poll_table.grant_stream_read(aggregate_votes_function)
+            self.aggregated_vote_table.grant_read_write_data(aggregate_votes_function)
+            ddb_aggregate_votes_event_source = DynamoEventSource(
+                self.poll_table, starting_position=StartingPosition.LATEST
+            )
+            aggregate_votes_function.add_event_source(ddb_aggregate_votes_event_source)
+
+        setup_ddb_streams()
+
+    def create_api_endpoints(self, apigw):
+
+        get_all_votes_function = api_lambda_function(
+            self, "GetAllVoteLambda", "vote.get_all_votes", apigw, "/vote", GET
+        )
+        self.aggregated_vote_table.grant_read_data(get_all_votes_function)
+
+        get_vote_function = api_lambda_function(
+            self, "GetVoteLambda", "vote.get_vote_by_id", apigw, "/vote/{vote_id}", GET,
+        )
+        self.aggregated_vote_table.grant_read_data(get_vote_function)
+
+        create_vote_function = api_lambda_function(
+            self, "CreateVotePollLambda", "vote.insert_new_vote", apigw, "/vote", POST,
+        )
+        self.poll_table.grant_write_data(create_vote_function)
+
+        post_vote_function = api_lambda_function(
+            self, "PostVoteLambda", "vote.update_vote", apigw, "/vote/{vote_id}", POST,
         )
 
-        # DynamoDB Stream (Lambda Event Source)
-        poll_table.grant_stream_read(aggregate_votes_function)
-        aggregated_vote_table.grant_read_write_data(aggregate_votes_function)
-        ddb_aggregate_votes_event_source = DynamoEventSource(
-            poll_table, starting_position=StartingPosition.LATEST
-        )
-        aggregate_votes_function.add_event_source(ddb_aggregate_votes_event_source)
+    def create_sqs_queue(self):
 
-        # AWS API Gateway HTTP API
-        vote_api = HttpApi(self, "VoteHttpApi")
+        voting_queue = Queue(self, "voting-queue")
 
-        # Get Votes API
-        get_all_votes_function = Function(
-            self,
-            "GetAllVoteLambda",
-            handler="vote.get_all_votes",
-            runtime=Runtime.PYTHON_3_8,
-            code=lambda_code.asset("./backend"),
-        )
-        vote_api.add_routes(
-            path="/vote",
-            methods=[HttpMethod.GET],
-            integration=LambdaProxyIntegration(handler=get_all_votes_function),
-        )
-        aggregated_vote_table.grant_read(get_all_votes_function)
+        def create_sqs_worker():
 
-        # Get Votes API
-        get_vote_function = Function(
-            self,
-            "GetVoteLambda",
-            handler="vote.get_vote_by_id",
-            runtime=Runtime.PYTHON_3_8,
-            code=lambda_code.asset("./backend"),
-        )
-        vote_api.add_routes(
-            path="/vote/{vote_id}",
-            methods=[HttpMethod.GET],
-            integration=LambdaProxyIntegration(handler=get_vote_function),
-        )
-        aggregated_vote_table.grant_read(get_vote_function)
+            # SQS Consumer worker
+            voting_to_ddb_function = Function(
+                self,
+                "VotingToDDBLambda",
+                handler="sqs_worker.insert_to_vote_db_table",
+                runtime=PYTHON_RUNTIME,
+                code=lambda_code.asset("./backend"),
+            )
 
-        # Create Vote API
-        create_vote_function = Function(
-            self,
-            "CreateVotePollLambda",
-            handler="vote.insert_new_vote",
-            runtime=Runtime.PYTHON_3_8,
-            code=lambda_code.asset("./backend"),
-        )
-        vote_api.add_routes(
-            path="/vote",
-            methods=[HttpMethod.POST],
-            integration=LambdaProxyIntegration(handler=create_vote_function),
-        )
-        poll_table.grant_write(create_vote_function)
+            # SQS Queue to Lambda trigger mapping
+            voting_to_ddb_event_source = SqsEventSource(voting_queue)
+            voting_to_ddb_function.add_event_source(voting_to_ddb_event_source)
 
-        # Vote a Poll API
-        post_vote_function = Function(
-            self,
-            "PostVoteLambda",
-            handler="vote.update_vote",
-            runtime=Runtime.PYTHON_3_8,
-            code=lambda_code.asset("./backend"),
-        )
-        vote_api.add_routes(
-            path="/vote/{vote_id}",
-            methods=[HttpMethod.POST],
-            integration=LambdaProxyIntegration(handler=post_vote_function),
-        )
-
-        # API Gateway (HTTP API) DONE
-        # Lambdas:
-        # - GET / DONE DONE
-        # - GET /vote/<id> DONE
-        # - POST /vote DONE
-        # - POST /vote/<id> DONE
-
-        # DynamoDB tables: DONE
-        # - vote DONE
-        # - aggregated_vote DONE
-
-        # DynamoDB Stream DONE
-        # Lambda DynamoDB Stream worker consumer DONE
-
-        # SQS queue
-        # SQS Lambda consumer
-
-        # AWS Cognito (Use Cognito Hosted UI)
-
-        # Route53 pointing to api.voting.com
+        create_sqs_worker()
 
 
 class VotingFrontendCdkStack(core.Stack):

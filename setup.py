@@ -20,6 +20,8 @@ setuptools.setup(
         "aws-cdk.aws_apigatewayv2",
         "aws-cdk.aws_dynamodb",
         "aws_cdk.aws_lambda_event_sources",
+        "aws_cdk.aws_sqs",
+        "aws_cdk.aws_cognito",
     ],
     python_requires=">=3.6",
     classifiers=[
