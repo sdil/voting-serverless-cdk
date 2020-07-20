@@ -2,9 +2,17 @@ from aws_cdk.aws_sqs import Queue
 from aws_cdk import core
 from aws_cdk.aws_apigatewayv2 import HttpApi, HttpMethod, LambdaProxyIntegration
 from aws_cdk.aws_dynamodb import Attribute, AttributeType, StreamViewType, Table
-from aws_cdk.aws_lambda import Code as lambda_code
-from aws_cdk.aws_lambda import Function, Runtime, StartingPosition
+from aws_cdk.aws_lambda import Function, Runtime, StartingPosition, Code
 from aws_cdk.aws_lambda_event_sources import DynamoEventSource, SqsDlq, SqsEventSource
+from aws_cdk.aws_cognito import UserPool
+from aws_cdk.aws_s3 import Bucket
+from aws_cdk.aws_cloudfront import (
+    CloudFrontWebDistribution,
+    S3OriginConfig,
+    SourceConfiguration,
+    Behavior,
+)
+from aws_cdk.aws_s3_deployment import BucketDeployment, Source
 from utils import api_lambda_function
 
 GET = HttpMethod.GET
@@ -20,13 +28,12 @@ class VotingServerlessCdkStack(core.Stack):
         self.aggregated_vote_table = None
         self.create_ddb_tables()
 
-        # AWS API Gateway HTTP API
         vote_api = HttpApi(self, "VoteHttpApi")
         self.create_api_endpoints(vote_api)
 
         self.create_sqs_queue()
 
-        # AWS Cognito (Use Cognito Hosted UI)
+        self.users = UserPool(self, "vote-user")  # make it Hosted UI
 
         # Route53 pointing to api.voting.com
 
@@ -56,7 +63,7 @@ class VotingServerlessCdkStack(core.Stack):
                 "AggregateVotesLambda",
                 handler="ddb_stream.aggregate_vote_table",
                 runtime=PYTHON_RUNTIME,
-                code=lambda_code.asset("./backend"),
+                code=Code.asset("./backend"),
             )
 
             # DynamoDB Stream (Lambda Event Source)
@@ -102,7 +109,7 @@ class VotingServerlessCdkStack(core.Stack):
                 "VotingToDDBLambda",
                 handler="sqs_worker.insert_to_vote_db_table",
                 runtime=PYTHON_RUNTIME,
-                code=lambda_code.asset("./backend"),
+                code=Code.asset("./backend"),
             )
 
             # SQS Queue to Lambda trigger mapping
@@ -116,6 +123,33 @@ class VotingFrontendCdkStack(core.Stack):
     def __init__(self, scope: core.Construct, id: str, **kwargs) -> None:
         super().__init__(scope, id, **kwargs)
 
-    # S3 Assets
-    # Cloudfront serving the frontend page
-    # Route53 pointing to www.voting.com
+        frontend_bucket = Bucket(
+            self,
+            "frontend",
+            website_index_document="index.html",
+            public_read_access=True,
+        )
+
+        frontend_distribution = CloudFrontWebDistribution(
+            self,
+            "frontend-cdn",
+            origin_configs=[
+                SourceConfiguration(
+                    s3_origin_source=S3OriginConfig(s3_bucket_source=frontend_bucket),
+                    behaviors=[Behavior(is_default_behavior=True)],
+                )
+            ],
+        )
+
+        BucketDeployment(
+            self,
+            "DeployWithInvalidation",
+            sources=[Source.asset("./frontend/dist")],
+            destination_bucket=frontend_bucket,
+            distribution=frontend_distribution,
+            distribution_paths=["/*"],
+        )
+
+        core.CfnOutput(self, "cdn-domain", value=frontend_distribution.distribution_domain_name)
+
+        # Route53 pointing to www.voting.com

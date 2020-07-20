@@ -22,6 +22,9 @@ setuptools.setup(
         "aws_cdk.aws_lambda_event_sources",
         "aws_cdk.aws_sqs",
         "aws_cdk.aws_cognito",
+        "aws_cdk.aws_cloudfront",
+        "aws_cdk.aws_s3",
+        "aws_cdk.aws_s3_deployment",
     ],
     python_requires=">=3.6",
     classifiers=[
