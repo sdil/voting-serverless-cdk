@@ -5,12 +5,7 @@ from aws_cdk.aws_apigatewayv2 import (
     HttpMethod,
 )
 from aws_cdk.aws_lambda import Function, Runtime, Code as lambda_code, StartingPosition
-from aws_cdk.aws_dynamodb import (
-    Table,
-    Attribute,
-    AttributeType,
-    StreamViewType
-)
+from aws_cdk.aws_dynamodb import Table, Attribute, AttributeType, StreamViewType
 from aws_cdk.aws_lambda_event_sources import DynamoEventSource, SqsDlq
 
 
@@ -26,7 +21,7 @@ class VotingServerlessCdkStack(core.Stack):
             partition_key=Attribute(name="id", type=AttributeType.STRING),
             read_capacity=10,
             write_capacity=10,
-            stream=StreamViewType.NEW_IMAGE
+            stream=StreamViewType.NEW_IMAGE,
         )
 
         # Aggregated Vote Table
@@ -42,16 +37,18 @@ class VotingServerlessCdkStack(core.Stack):
         aggregate_votes_function = Function(
             self,
             "AggregateVotesLambda",
-            handler="ddb_stream.aggregated_vote_table",
+            handler="ddb_stream.aggregate_vote_table",
             runtime=Runtime.PYTHON_3_8,
             code=lambda_code.asset("./backend"),
         )
 
         # DynamoDB Stream (Lambda Event Source)
-        lambda_ddb_aggregate_votes_stream = DynamoEventSource(
-            poll_table,
-            starting_position=StartingPosition.LATEST
+        poll_table.grant_stream_read(aggregate_votes_function)
+        aggregated_vote_table.grant_read_write_data(aggregate_votes_function)
+        ddb_aggregate_votes_event_source = DynamoEventSource(
+            poll_table, starting_position=StartingPosition.LATEST
         )
+        aggregate_votes_function.add_event_source(ddb_aggregate_votes_event_source)
 
         # AWS API Gateway HTTP API
         vote_api = HttpApi(self, "VoteHttpApi")
@@ -69,6 +66,7 @@ class VotingServerlessCdkStack(core.Stack):
             methods=[HttpMethod.GET],
             integration=LambdaProxyIntegration(handler=get_all_votes_function),
         )
+        aggregated_vote_table.grant_read(get_all_votes_function)
 
         # Get Votes API
         get_vote_function = Function(
@@ -83,6 +81,7 @@ class VotingServerlessCdkStack(core.Stack):
             methods=[HttpMethod.GET],
             integration=LambdaProxyIntegration(handler=get_vote_function),
         )
+        aggregated_vote_table.grant_read(get_vote_function)
 
         # Create Vote API
         create_vote_function = Function(
@@ -97,8 +96,9 @@ class VotingServerlessCdkStack(core.Stack):
             methods=[HttpMethod.POST],
             integration=LambdaProxyIntegration(handler=create_vote_function),
         )
+        poll_table.grant_write(create_vote_function)
 
-        # Get Votes API
+        # Vote a Poll API
         post_vote_function = Function(
             self,
             "PostVoteLambda",
@@ -123,8 +123,8 @@ class VotingServerlessCdkStack(core.Stack):
         # - vote DONE
         # - aggregated_vote DONE
 
-        # DynamoDB Stream
-        # Lambda DynamoDB Stream worker consumer
+        # DynamoDB Stream DONE
+        # Lambda DynamoDB Stream worker consumer DONE
 
         # SQS queue
         # SQS Lambda consumer
