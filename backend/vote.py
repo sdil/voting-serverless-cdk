@@ -4,18 +4,19 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 
-def get_votes():
+def get_all_votes(event, context):
     """
     Get most recent votes from aggregated-vote-db
     """
-    pass
+    logger.info("get all votes")
 
 
-def get_vote_by_id():
+def get_vote_by_id(event, context):
     """
     Read a single vote item from aggregated-vote-db table
     """
-    pass
+    path = event.get("pathParameters").get("vote_id")
+    logger.info(path)
 
 
 def insert_new_vote(event, context):
