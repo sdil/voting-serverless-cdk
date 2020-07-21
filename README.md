@@ -9,7 +9,7 @@ Why am I doing this? I am learning AWS and serverless technology. This is my fir
 
 ## Architecture
 
-![Voting App Architecture](architecture.png =500x700)
+![Voting App Architecture](architecture.png | width=500)
 
 Generally the application is built in [Jamstack architecture](https://jamstack.wtf). The frontend is a VueJS + NuxtJS application served from AWS CloudFront (CDN) and AWS S3 (Origin). The API Server is built in FaaS model. It consist of:
 
