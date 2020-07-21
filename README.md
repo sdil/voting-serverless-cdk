@@ -1,13 +1,7 @@
 
 # Voting App in Serverless AWS CDK
 
-## Introduction
-
-### Motivation
-
-Why am I doing this? I am learning AWS and serverless technology. This is my first time writing a fullstack serverless application. This is my playground to learn CDK and AWS services generally.
-
-## Architecture
+This is a simple voting app built using Serverless stack in AWS CDK.
 
 <a href="https://raw.githubusercontent.com/sdil/voting-serverless-cdk/master/architecture.png"><img src="https://raw.githubusercontent.com/sdil/voting-serverless-cdk/master/architecture.png" height="600" width="500" ></a>
 
@@ -19,8 +13,13 @@ Generally the application is built in [Jamstack architecture](https://jamstack.w
 - DynamoDB tables for data persistence
 - DynamoDB streams & consumer worker to update aggregated-vote DynamoDB table
 - SQS Queue in the middle to theoretically withstand high number of request per second of voting endpoint so that DynamoDB will not be throttled
+- Lumigo tracer for distributed tracing
 
 This architecture is intentionally made in more sophisticated way for me to touch more AWS services.
+
+### Motivation
+
+Why am I doing this? I am learning AWS and serverless technology. This is my first time writing a fullstack serverless application. This is my playground to learn CDK and AWS services generally.
 
 ## Contributing
 
