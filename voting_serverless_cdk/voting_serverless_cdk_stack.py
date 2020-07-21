@@ -150,6 +150,8 @@ class VotingFrontendCdkStack(core.Stack):
             distribution_paths=["/*"],
         )
 
-        core.CfnOutput(self, "cdn-domain", value=frontend_distribution.distribution_domain_name)
+        core.CfnOutput(
+            self, "cdn-domain", value=frontend_distribution.distribution_domain_name
+        )
 
         # Route53 pointing to www.voting.com

@@ -2,7 +2,10 @@
 
 from aws_cdk import core
 
-from voting_serverless_cdk.voting_serverless_cdk_stack import VotingServerlessCdkStack, VotingFrontendCdkStack
+from voting_serverless_cdk.voting_serverless_cdk_stack import (
+    VotingServerlessCdkStack,
+    VotingFrontendCdkStack,
+)
 
 
 app = core.App()
