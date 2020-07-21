@@ -1,13 +1,29 @@
 
 # Voting App in Serverless AWS CDK
 
-# Introduction
+## Introduction
 
-![Voting App Architecture](architecture.png)
+## Motivation
 
+Why am I doing this? I am learning AWS and serverless technology. This is my first time writing a fullstack serverless application. This is my playground to learn CDK and AWS services generally.
 
+## Architecture
 
-# Contributing
+![Voting App Architecture](architecture.png =500x700)
+
+Generally the application is built in [Jamstack architecture](https://jamstack.wtf). The frontend is a VueJS + NuxtJS application served from AWS CloudFront (CDN) and AWS S3 (Origin). The API Server is built in FaaS model. It consist of:
+
+- API Gateway HTTP API
+- Lambda functions for each endpoints
+- AWS Cognito as identity provider
+- DynamoDB tables for data persistence
+- SQS Queue in the middle to theoretically withstand high number of request per second of voting endpoint so that DynamoDB will not be throttled
+
+This architecture is intentionally made in more sophisticated way for me to touch more AWS services.
+
+## Contributing
+
+Start a Python virtualenv
 
 ```
 $ python3 -m venv .env
