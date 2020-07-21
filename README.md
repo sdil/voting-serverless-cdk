@@ -3,7 +3,7 @@
 
 ## Introduction
 
-## Motivation
+### Motivation
 
 Why am I doing this? I am learning AWS and serverless technology. This is my first time writing a fullstack serverless application. This is my playground to learn CDK and AWS services generally.
 
@@ -11,12 +11,13 @@ Why am I doing this? I am learning AWS and serverless technology. This is my fir
 
 <a href="https://raw.githubusercontent.com/sdil/voting-serverless-cdk/master/architecture.png"><img src="https://raw.githubusercontent.com/sdil/voting-serverless-cdk/master/architecture.png" height="600" width="500" ></a>
 
-Generally the application is built in [Jamstack architecture](https://jamstack.wtf). The frontend is a VueJS + NuxtJS application served from AWS CloudFront (CDN) and AWS S3 (Origin). The API Server is built in FaaS model. It consist of:
+Generally the application is built in [Jamstack architecture](https://jamstack.wtf). The frontend is a VueJS + NuxtJS application served from *AWS CloudFront* (CDN) and *AWS S3* (Origin). The API Server is built in FaaS model. It consist of:
 
 - API Gateway HTTP API
 - Lambda functions for each endpoints
 - AWS Cognito as identity provider
 - DynamoDB tables for data persistence
+- DynamoDB streams & consumer worker to update aggregated-vote DynamoDB table
 - SQS Queue in the middle to theoretically withstand high number of request per second of voting endpoint so that DynamoDB will not be throttled
 
 This architecture is intentionally made in more sophisticated way for me to touch more AWS services.
