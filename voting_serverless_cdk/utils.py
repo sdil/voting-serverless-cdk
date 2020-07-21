@@ -6,7 +6,9 @@ import os
 LUMIGO_TOKEN = os.environ.get("LUMIGO_TOKEN", "")
 
 
-def api_lambda_function(scope, name, handler, apigw, path, method, code="./backend"):
+def api_lambda_function(
+    scope, name, handler, apigw, path, method, layer, code="./backend"
+):
     _lambda = Function(
         scope,
         name,
@@ -14,6 +16,7 @@ def api_lambda_function(scope, name, handler, apigw, path, method, code="./backe
         runtime=Runtime.PYTHON_3_8,
         code=Code.asset(code),
         tracing=Tracing.ACTIVE,
+        layers=layer,
     )
 
     _lambda.add_environment("LUMIGO_TOKEN", LUMIGO_TOKEN)

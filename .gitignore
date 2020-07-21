@@ -10,3 +10,4 @@ __pycache__
 cdk.out
 
 frontend/node_modules
+python-deps-layer/*

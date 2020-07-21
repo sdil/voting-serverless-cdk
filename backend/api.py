@@ -1,16 +1,12 @@
 import logging
 import os
 import boto3
-from aws_xray_sdk.core import xray_recorder
-from aws_xray_sdk.core import patch_all
+from aws_xray_sdk.core import xray_recorder, patch_all
 
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 patch_all()
-
-client = boto3.client("lambda")
-client.get_account_settings()
 
 
 LUMIGO_TOKEN = os.environ.get("LUMIGO_TOKEN", "")
@@ -38,7 +34,7 @@ def insert_new_vote(event, context):
     logger.info("test")
 
 
-def update_vote():
+def update_vote(event, context):
     """
     Publish an message to SQS queue
     """
