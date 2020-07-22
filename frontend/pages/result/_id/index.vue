@@ -11,11 +11,6 @@ export default {
   components: {
     PollResult
   },
-  data() {
-    return {
-        radio: 'default'
-    }
-  }
 
 }
 </script>

@@ -15,7 +15,17 @@
         <b-input placeholder="Loud purr" name="question" expanded></b-input>
       </b-field>
 
-      <b-button type="is-dark" @click="SubmitVote()">Submit</b-button>
+      <b-button type="is-dark" @click="SubmitPoll()">Submit</b-button>
     </div>
   </section>
 </template>
+
+<script>
+export default {
+  methods: {
+      SubmitPoll() {
+          this.$router.push("/")
+      }
+  },
+}
+</script>
