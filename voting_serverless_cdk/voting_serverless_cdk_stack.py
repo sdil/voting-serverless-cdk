@@ -181,6 +181,10 @@ class VotingFrontendCdkStack(core.Stack):
             ],
         )
 
+        # CloudFront Origin should be S3 DNS name, not the S3 bucket itself
+        # Otherwise, the CloudFront cannot serve dynamic pages (eg. /vote/{id} page)
+        # https://stackoverflow.com/a/59359038/7999204
+
         BucketDeployment(
             self,
             "DeployWithInvalidation",
