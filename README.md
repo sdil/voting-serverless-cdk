@@ -24,9 +24,10 @@ Why am I doing this? I am learning AWS and serverless technology. This is my fir
 
 ## Personal Takeways / Lesson Learned
 
-- [AWS] When deploying SSR websites on CloudFront, you cannot point the origin to S3 Bucket. Instead, you have to point the origin to S3 DNS name (eg. `<bucket>.s3-website.us-east-2.amazonaws.com`) as Custom Origin, not S3 Origin.
-- [AWS] It's almost impossible to write a API Doc for AWS API Gateway HTTP API, so use REST API if you planning to have one.
-- [NuxtJS] You cannot write a `<nuxt-link>` in `<b-navbar>` tag. It will cause a hydration issue. Use this instead: `<b-navbar-item tag="router-link" :to="{ path: '/' }">`.
+- **[AWS CloudFront]** When deploying SSR websites on CloudFront, you cannot point the origin to S3 Bucket. Instead, you have to point the origin to S3 DNS name (eg. `<bucket>.s3-website.us-east-2.amazonaws.com`) as Custom Origin, not S3 Origin.
+- **[AWS API Gateway]** It's almost impossible to write a API Doc for AWS API Gateway HTTP API, so use REST API if you planning to have one.
+- **[AWS Lambda]** In order to setup Python deps packages, you have to use Lambda Layer where it will be mounted in `/opt/` in actual Lambda function. For Python 3.8, you have to put the files in `./python/lib/python3.8/site-packages/` so that the Lambda function can use the packages correctly.
+- **[NuxtJS]** You cannot write a `<nuxt-link>` in `<b-navbar>` tag. It will cause a hydration issue. Use this instead: `<b-navbar-item tag="router-link" :to="{ path: '/' }">`.
 
 ## Contributing
 
