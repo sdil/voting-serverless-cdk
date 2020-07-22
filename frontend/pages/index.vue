@@ -1,41 +1,19 @@
 <template>
   <section class="section">
     <div class="columns is-mobile">
-      <card
-        title="Free"
-        icon="github"
-      >
-        Open source on <a href="https://github.com/buefy/buefy">
-          GitHub
-        </a>
-      </card>
+      <div class="content">
+        <h1 class="title is-large">Poll 1</h1>
+        <h2 class="is-medium">What is that?</h2>
 
-      <card
-        title="Responsive"
-        icon="cellphone-link"
-      >
-        <b class="has-text-grey">
-          Every
-        </b> component is responsive
-      </card>
+        <div class="field">
+          <b-radio v-model="radio" native-value="bird">Bird</b-radio>
+        </div>
+        <div class="field">
+          <b-radio v-model="radio" native-value="plane">Plane</b-radio>
+        </div>
 
-      <card
-        title="Modern"
-        icon="alert-decagram"
-      >
-        Built with <a href="https://vuejs.org/">
-          Vue.js
-        </a> and <a href="http://bulma.io/">
-          Bulma
-        </a>
-      </card>
-
-      <card
-        title="Lightweight"
-        icon="arrange-bring-to-front"
-      >
-        No other internal dependency
-      </card>
+        <b-button type="is-dark">Submit</b-button>
+      </div>
     </div>
   </section>
 </template>
@@ -48,6 +26,12 @@ export default {
 
   components: {
     Card
+  },
+  data() {
+    return {
+        radio: 'default'
+    }
   }
+
 }
 </script>
