@@ -13,7 +13,7 @@
           <b-radio v-model="radio" native-value="plane">Plane</b-radio>
         </div>
 
-        <b-button type="is-dark">Submit</b-button>
+        <b-button type="is-dark" @click="SubmitVote()">Submit</b-button>
       </div>
     </div>
   </section>
@@ -31,6 +31,11 @@ export default {
       type: String,
       required: true
     }
+  },
+  methods: {
+      SubmitVote() {
+          this.$router.push({name: "result-id", params: {id: 1}})
+      }
   },
   data() {
     return {

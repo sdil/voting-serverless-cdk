@@ -18,9 +18,13 @@ Generally the application is built in [Jamstack architecture](https://jamstack.w
 
 This architecture is intentionally made in more sophisticated way for me to touch more AWS services.
 
-### Motivation
+## Motivation
 
 Why am I doing this? I am learning AWS and serverless technology. This is my first time writing a fullstack serverless application. This is my playground to learn CDK and AWS services generally.
+
+## Personal Takeways / Lesson Learned
+
+- When deploying SSR websites on CloudFront, you cannot point the origin to S3 Bucket. Instead, you have to point the origin to S3 DNS name (eg. `<bucket>.s3-website.us-east-2.amazonaws.com`) as Custom Origin, not S3 Origin.
 
 ## Contributing
 
