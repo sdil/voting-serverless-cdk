@@ -1,10 +1,5 @@
 <template>
-
-  <Poll
-    :id=$route.params.id
-    question="sadfg"
-  />
-
+  <Poll :id=$route.params.id question="sadfg" />
 </template>
 
 <script>

@@ -3,9 +3,9 @@
     <div class="columns is-mobile">
       <div class="content">
         
-        <Poll id="1" question="What is that?" />
+        <Poll key="1" id="1" question="What is that?" />
 
-        <Poll id="2" question="Where is that?" />
+        <Poll key="2" id="2" question="Where is that?" />
 
       </div>
     </div>
@@ -21,11 +21,7 @@ export default {
   components: {
     Poll
   },
-  data() {
-    return {
-        radio: 'default'
-    }
-  }
+  
 
 }
 </script>

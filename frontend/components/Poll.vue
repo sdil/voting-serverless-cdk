@@ -2,7 +2,9 @@
   <section class="section">
     <div class="columns is-mobile">
       <div class="content">
-        <nuxt-link :to="'/poll/' + id"><h2 class="is-medium">{{ question }}</h2></nuxt-link>
+        <nuxt-link :to="'/poll/' + id">
+          <h2 class="is-medium">{{ question }}</h2>
+        </nuxt-link>
 
         <div class="field">
           <b-radio v-model="radio" native-value="bird">Bird</b-radio>
@@ -28,6 +30,11 @@ export default {
     question: {
       type: String,
       required: true
+    }
+  },
+  data() {
+    return {
+        radio: 'default'
     }
   }
 }

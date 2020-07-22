@@ -6,3 +6,9 @@ deploy-frontend:
 	cd frontend && npm run build && nuxt export
 	cdk diff voting-frontend-cdk
 	cdk deploy voting-frontend-cdk
+
+dev-frontend:
+	cd frontend && npm run dev
+
+build-frontend:
+	cd frontend && npm run build && nuxt export && nuxt serve
