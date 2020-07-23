@@ -118,7 +118,7 @@ class VotingServerlessCdkStack(core.Stack):
         create_vote_function = api_lambda_function(
             self,
             "CreateVotePollLambda",
-            "api.insert_new_vote",
+            "api.create_vote",
             apigw,
             "/vote",
             POST,

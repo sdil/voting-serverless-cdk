@@ -2,15 +2,17 @@ import logging
 import os
 import boto3
 from aws_xray_sdk.core import xray_recorder, patch_all
-
+from .models import Poll, Vote
+from db.dynamodb import DynamoDBAdapter
+import uuid 
+from datetime import datetime
+from collections import Counter
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 patch_all()
 
-
-LUMIGO_TOKEN = os.environ.get("LUMIGO_TOKEN", "")
-
+db = DynamoDBAdapter()
 
 def get_all_votes(event, context):
     """
@@ -27,11 +29,12 @@ def get_vote_by_id(event, context):
     logger.info(path)
 
 
-def insert_new_vote(event, context):
+def create_poll(event, context):
     """
     Create a new voting poll
     """
-    logger.info("test")
+    poll = Poll(uuid.uuid4(), datetime.now(), "test", {1: "1", 2: "2"}, Counter(), "user1")
+    db.insert_poll(poll)
 
 
 def update_vote(event, context):
