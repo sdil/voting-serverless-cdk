@@ -115,25 +115,13 @@ class VotingServerlessCdkStack(core.Stack):
         )
         self.aggregated_vote_table.grant_read_data(get_vote_function)
 
-        create_vote_function = api_lambda_function(
-            self,
-            "CreateVotePollLambda",
-            "api.create_vote",
-            apigw,
-            "/vote",
-            POST,
-            layers,
+        create_poll_function = api_lambda_function(
+            self, "CreatePollLambda", "api.create_poll", apigw, "/vote", POST, layers,
         )
-        self.poll_table.grant_write_data(create_vote_function)
+        self.poll_table.grant_write_data(create_poll_function)
 
         post_vote_function = api_lambda_function(
-            self,
-            "PostVoteLambda",
-            "api.update_vote",
-            apigw,
-            "/vote/{vote_id}",
-            POST,
-            layers,
+            self, "PostVoteLambda", "api.vote", apigw, "/vote/{vote_id}", POST, layers,
         )
 
     def create_sqs_queue(self, deps_layer):

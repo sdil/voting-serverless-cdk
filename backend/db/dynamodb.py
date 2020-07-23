@@ -1,10 +1,9 @@
-from interface import AbstractDatabase
+from db.interface import AbstractDatabase
+
 
 class DynamoDBAdapter(AbstractDatabase):
+    def insert_poll(self, poll):
+        pass
 
     def get_poll(self):
         pass
-
-    def insert_poll(self):
-        pass
-

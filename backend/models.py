@@ -18,7 +18,7 @@ class Poll:
 class Vote:
     __slots__ = ["id", "date", "vote", "poll", "user"]
     id: str
-    date: datetime.datetime
+    date: datetime
     poll: str
     vote: str
     user: str
@@ -28,5 +28,5 @@ class Vote:
 class User:
     __slots__ = ["id", "date", "user"]
     id: str
-    date: datetime.datetime
+    date: datetime
     user: str
