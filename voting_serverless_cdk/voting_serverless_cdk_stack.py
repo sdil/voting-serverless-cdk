@@ -27,7 +27,6 @@ class VotingServerlessCdkStack(core.Stack):
         python_deps_layer = self.create_deps_layer()
 
         self.poll_table = None
-        self.aggregated_vote_table = None
         self.create_ddb_tables([python_deps_layer])
 
         vote_api = HttpApi(self, "VoteHttpApi")
@@ -62,17 +61,10 @@ class VotingServerlessCdkStack(core.Stack):
             self,
             "PollTable",
             partition_key=Attribute(name="id", type=AttributeType.STRING),
+            sort_key=Attribute(name="SK", type=AttributeType.STRING),
             read_capacity=10,
             write_capacity=10,
             stream=StreamViewType.NEW_IMAGE,
-        )
-
-        self.aggregated_vote_table = Table(  # Revise this
-            self,
-            "AggregatedVoteTable",
-            partition_key=Attribute(name="id", type=AttributeType.STRING),
-            read_capacity=5,
-            write_capacity=5,
         )
 
         def setup_ddb_streams():
@@ -89,7 +81,7 @@ class VotingServerlessCdkStack(core.Stack):
 
             # DynamoDB Stream (Lambda Event Source)
             self.poll_table.grant_stream_read(aggregate_votes_function)
-            self.aggregated_vote_table.grant_read_write_data(aggregate_votes_function)
+            self.poll_table.grant_read_write_data(aggregate_votes_function)
             ddb_aggregate_votes_event_source = DynamoEventSource(
                 self.poll_table, starting_position=StartingPosition.LATEST
             )
@@ -100,9 +92,16 @@ class VotingServerlessCdkStack(core.Stack):
     def create_api_endpoints(self, apigw, layers):
 
         get_all_votes_function = api_lambda_function(
-            self, "GetAllVoteLambda", "api.get_all_votes", apigw, "/vote", GET, layers
+            self,
+            "GetAllVoteLambda",
+            "api.get_all_votes",
+            apigw,
+            "/vote",
+            GET,
+            layers,
+            [self.poll_table],
         )
-        self.aggregated_vote_table.grant_read_data(get_all_votes_function)
+        self.poll_table.grant_read_data(get_all_votes_function)
 
         get_vote_function = api_lambda_function(
             self,
@@ -112,16 +111,31 @@ class VotingServerlessCdkStack(core.Stack):
             "/vote/{vote_id}",
             GET,
             layers,
+            [self.poll_table],
         )
-        self.aggregated_vote_table.grant_read_data(get_vote_function)
+        self.poll_table.grant_read_data(get_vote_function)
 
         create_poll_function = api_lambda_function(
-            self, "CreatePollLambda", "api.create_poll", apigw, "/vote", POST, layers,
+            self,
+            "CreatePollLambda",
+            "api.create_poll",
+            apigw,
+            "/vote",
+            POST,
+            layers,
+            [self.poll_table],
         )
         self.poll_table.grant_write_data(create_poll_function)
 
         post_vote_function = api_lambda_function(
-            self, "PostVoteLambda", "api.vote", apigw, "/vote/{vote_id}", POST, layers,
+            self,
+            "PostVoteLambda",
+            "api.vote",
+            apigw,
+            "/vote/{vote_id}",
+            POST,
+            layers,
+            [self.poll_table],
         )
 
     def create_sqs_queue(self, deps_layer):

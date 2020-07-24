@@ -1,12 +1,15 @@
+import dataclasses
 import logging
 import os
-import boto3
-from aws_xray_sdk.core import xray_recorder, patch_all
-from models import Poll, Vote
-from db.dynamodb import DynamoDBAdapter
 import uuid
-from datetime import datetime
 from collections import Counter
+from datetime import datetime
+
+import boto3
+from aws_xray_sdk.core import patch_all, xray_recorder
+
+from db.dynamodb import DynamoDBAdapter
+from models import Poll, Vote
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -26,8 +29,11 @@ def get_vote_by_id(event, context):
     """
     Read a single vote item from aggregated-vote-db table
     """
-    path = event.get("pathParameters").get("vote_id")
-    logger.info(path)
+    id = event.get("pathParameters").get("vote_id")
+    poll = db.get_poll(id)
+    logger.info(poll)
+
+    return {"statusCode": 200, "body": poll.to_json()}
 
 
 def create_poll(event, context):
@@ -35,10 +41,17 @@ def create_poll(event, context):
     Create a new voting poll
     """
     poll = Poll(
-        uuid.uuid4(), datetime.now(), "test", {1: "1", 2: "2"}, Counter(), "user1"
+        str(uuid.uuid4()),
+        datetime.now(),
+        "what if cat rule the world?",
+        Counter({"poops everywhere": 0, "king of love": 0}),
+        "user1",
     )
     db.insert_poll(poll)
-    logger.info(f"{poll} is inserted")
+
+    msg = {"status": "success", "message": f"poll {poll.id} is created"}
+
+    return {"statusCode": 200, "body": msg}
 
 
 def vote(event, context):

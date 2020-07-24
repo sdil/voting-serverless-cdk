@@ -3,11 +3,8 @@ from aws_cdk.aws_lambda import Function, Runtime, Code, Tracing
 import os
 
 
-LUMIGO_TOKEN = os.environ.get("LUMIGO_TOKEN", "")
-
-
 def api_lambda_function(
-    scope, name, handler, apigw, path, method, layer, code="./backend"
+    scope, name, handler, apigw, path, method, layer, tables, code="./backend"
 ):
     _lambda = Function(
         scope,
@@ -19,7 +16,7 @@ def api_lambda_function(
         layers=layer,
     )
 
-    _lambda.add_environment("LUMIGO_TOKEN", LUMIGO_TOKEN)
+    _lambda.add_environment("POLL_TABLE", tables[0].table_name)
 
     apigw.add_routes(
         path=path,
