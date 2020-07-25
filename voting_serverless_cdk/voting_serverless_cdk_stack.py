@@ -19,6 +19,8 @@ GET = HttpMethod.GET
 POST = HttpMethod.POST
 PYTHON_RUNTIME = Runtime.PYTHON_3_8
 
+FRONTEND_DOMAIN_NAME = "https://vote.fadhil-blog.dev"
+
 
 class VotingServerlessCdkStack(core.Stack):
     def __init__(self, scope: core.Construct, id: str, **kwargs) -> None:
@@ -29,14 +31,33 @@ class VotingServerlessCdkStack(core.Stack):
         self.poll_table = None
         self.create_ddb_tables([python_deps_layer])
 
-        vote_api = HttpApi(self, "VoteHttpApi")
-        self.create_api_endpoints(vote_api, [python_deps_layer])
+        self.vote_api = self.create_api_gateway("VoteHttpApi")
+        self.create_api_endpoints(self.vote_api, [python_deps_layer])
 
         self.create_sqs_queue([python_deps_layer])
 
         self.users = UserPool(self, "vote-user")  # make it Hosted UI
 
         # Route53 pointing to api.voting.com
+
+    def create_api_gateway(self, name: str):
+        api = HttpApi(
+            self,
+            name,
+            cors_preflight={
+                "allow_headers": ["Authorization"],
+                "allow_methods": [
+                    HttpMethod.GET,
+                    HttpMethod.HEAD,
+                    HttpMethod.OPTIONS,
+                    HttpMethod.POST,
+                ],
+                "allow_origins": ["*"],
+                "max_age": core.Duration.days(10),
+            },
+        )
+
+        return api
 
     def create_deps_layer(self):
         """

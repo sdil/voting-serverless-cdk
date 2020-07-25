@@ -1,4 +1,5 @@
 import dataclasses
+import json
 import logging
 import os
 import uuid
@@ -33,7 +34,11 @@ def get_vote_by_id(event, context):
     poll = db.get_poll(id)
     logger.info(poll)
 
-    return {"statusCode": 200, "body": poll.to_json()}
+    return {
+        "statusCode": 200,
+        "headers": {"content-type": "application/json"},
+        "body": poll.to_json(),
+    }
 
 
 def create_poll(event, context):
@@ -41,7 +46,7 @@ def create_poll(event, context):
     Create a new voting poll
     """
     poll = Poll(
-        str(uuid.uuid4()),
+        uuid.uuid4(),
         datetime.now(),
         "what if cat rule the world?",
         Counter({"poops everywhere": 0, "king of love": 0}),
@@ -49,9 +54,13 @@ def create_poll(event, context):
     )
     db.insert_poll(poll)
 
-    msg = {"status": "success", "message": f"poll {poll.id} is created"}
+    msg = {
+        "status": "success",
+        "headers": {"content-type": "application/json"},
+        "message": f"poll {poll.id} is created",
+    }
 
-    return {"statusCode": 200, "body": msg}
+    return {"statusCode": 200, "body": json.dumps(msg)}
 
 
 def vote(event, context):
