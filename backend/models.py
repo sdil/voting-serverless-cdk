@@ -27,8 +27,9 @@ class Vote:
     id: str
     date: datetime
     poll: str
+    choice: int
     vote: str
-    user: str
+    user: str = None
 
 
 @dataclass

@@ -1,6 +1,7 @@
 from db.interface import AbstractDatabase
 import boto3
 import os
+from typing import List
 from models import Poll
 from datetime import datetime
 
@@ -9,8 +10,9 @@ class DynamoDBAdapter(AbstractDatabase):
     def __init__(self):
         dynamodb = boto3.resource("dynamodb")
         self.poll_table = dynamodb.Table(os.environ.get("POLL_TABLE"))
+        self.main_page_gsi = os.environ.get("MAIN_PAGE_GSI")
 
-    def insert_poll(self, poll: Poll):
+    def insert_poll(self, poll: Poll) -> None:
         self.poll_table.put_item(
             Item={
                 "id": poll.id,
@@ -25,7 +27,7 @@ class DynamoDBAdapter(AbstractDatabase):
             }
         )
 
-    def get_poll(self, id: str):
+    def get_poll(self, id: str) -> Poll:
         response = self.poll_table.get_item(Key={"id": id, "SK": "poll_info"})["Item"]
 
         return Poll(
@@ -35,3 +37,18 @@ class DynamoDBAdapter(AbstractDatabase):
             response["result"],
             response["user"],
         )
+
+    def get_all_polls(self) -> List[Poll]:
+        response = self.poll_table.scan(IndexName=self.main_page_gsi)["Items"]
+        polls = []
+
+        for poll in response:
+            poll = Poll(
+                poll["id"],
+                datetime.fromisoformat(poll["date"]),
+                poll["question"],
+                poll["result"],
+            )
+            polls.append(poll)
+
+        return polls

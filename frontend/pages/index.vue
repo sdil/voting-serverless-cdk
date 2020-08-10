@@ -4,7 +4,7 @@
       <div class="content">
         <b-button tag="router-link" to="create-poll" type="is-link" icon-left="vote">Create a poll</b-button>
 
-        <Poll :id="1" v-bind:poll="poll" />
+        <Poll :key="poll.id" v-bind:poll="poll" />
       </div>
     </div>
   </section>

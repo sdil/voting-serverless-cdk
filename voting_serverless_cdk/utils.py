@@ -17,6 +17,7 @@ def api_lambda_function(
     )
 
     _lambda.add_environment("POLL_TABLE", tables[0].table_name)
+    _lambda.add_environment("MAIN_PAGE_GSI", "main_page_gsi")
 
     apigw.add_routes(
         path=path,

@@ -7,5 +7,9 @@ class AbstractDatabase(ABC):
         pass
 
     @abstractmethod
-    def get_poll(self):
+    def get_poll(self, id: str):
+        pass
+
+    @abstractmethod
+    def get_all_polls(self):
         pass

@@ -21,18 +21,24 @@ db = DynamoDBAdapter()
 
 def get_all_votes(event, context):
     """
-    Get most recent votes from aggregated-vote-db
+    Get most recent polls from ddb
     """
-    logger.info("get all votes")
+
+    logger.info("get all polls")
+    polls = db.get_all_polls()
+    return {
+        "statusCode": 200,
+        "headers": {"content-type": "application/json"},
+        "body": Poll.schema().dumps(polls, many=True),
+    }
 
 
 def get_vote_by_id(event, context):
     """
-    Read a single vote item from aggregated-vote-db table
+    Read a single vote item from ddb
     """
     id = event.get("pathParameters").get("vote_id")
     poll = db.get_poll(id)
-    logger.info(poll)
 
     return {
         "statusCode": 200,

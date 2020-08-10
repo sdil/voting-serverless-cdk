@@ -1,7 +1,13 @@
 from aws_cdk.aws_sqs import Queue
 from aws_cdk import core
 from aws_cdk.aws_apigatewayv2 import HttpApi, HttpMethod, LambdaProxyIntegration
-from aws_cdk.aws_dynamodb import Attribute, AttributeType, StreamViewType, Table
+from aws_cdk.aws_dynamodb import (
+    Attribute,
+    AttributeType,
+    StreamViewType,
+    Table,
+    ProjectionType,
+)
 from aws_cdk.aws_lambda import Function, Runtime, StartingPosition, Code, LayerVersion
 from aws_cdk.aws_lambda_event_sources import DynamoEventSource, SqsDlq, SqsEventSource
 from aws_cdk.aws_cognito import UserPool
@@ -20,6 +26,8 @@ POST = HttpMethod.POST
 PYTHON_RUNTIME = Runtime.PYTHON_3_8
 
 FRONTEND_DOMAIN_NAME = "https://vote.fadhil-blog.dev"
+
+MAIN_PAGE_GSI = "main_page_gsi"
 
 
 class VotingServerlessCdkStack(core.Stack):
@@ -108,7 +116,16 @@ class VotingServerlessCdkStack(core.Stack):
             )
             aggregate_votes_function.add_event_source(ddb_aggregate_votes_event_source)
 
+        def setup_gsi_table():
+            self.poll_table.add_global_secondary_index(
+                partition_key=Attribute(name="PK2", type=AttributeType.STRING),
+                projection_type=ProjectionType.INCLUDE,
+                index_name=MAIN_PAGE_GSI,
+                non_key_attributes=["date", "question", "result"],
+            )
+
         setup_ddb_streams()
+        setup_gsi_table()
 
     def create_api_endpoints(self, apigw, layers):
 
