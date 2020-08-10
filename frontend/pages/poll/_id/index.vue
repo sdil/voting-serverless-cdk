@@ -1,5 +1,5 @@
 <template>
-  <Poll :id=$route.params.id question="sadfg" />
+  <Poll v-bind:poll="poll" />
 </template>
 
 <script>
@@ -9,13 +9,25 @@ export default {
   name: 'PollPage',
 
   components: {
-    Poll
+    Poll,
   },
   data() {
     return {
-        radio: 'default'
+      poll: {},
     }
-  }
-
+  },
+  async created() {
+    const config = {
+      headers: {
+        Accept: 'application/json',
+      },
+    }
+    try {
+      const res = await this.$axios.get(`/vote/${this.$route.params.id}`, config)
+      this.poll = res.data
+    } catch (error) {
+      console.log(error)
+    }
+  },
 }
 </script>

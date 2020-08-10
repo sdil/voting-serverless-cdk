@@ -4,9 +4,7 @@
       <div class="content">
         <b-button tag="router-link" to="create-poll" type="is-link" icon-left="vote">Create a poll</b-button>
 
-        <Poll key="1" id="1" question="What is that?" />
-
-        <Poll key="2" id="2" question="Where is that?" />
+        <Poll :id="1" v-bind:poll="poll" />
       </div>
     </div>
   </section>
@@ -19,9 +17,31 @@ export default {
   name: 'HomePage',
 
   components: {
-    Poll
+    Poll,
   },
-  
 
+  data() {
+    return {
+      poll: {},
+    }
+  },
+
+  async created() {
+    const config = {
+      headers: {
+        Accept: 'application/json',
+      },
+    }
+    try {
+      const res = await this.$axios.get(
+        '/vote/b2b546b7-5efd-4114-9c73-09f66bca519e',
+        config
+      )
+      console.log(res)
+      this.poll = res.data
+    } catch (error) {
+      console.log(error)
+    }
+  },
 }
 </script>

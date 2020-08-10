@@ -59,7 +59,7 @@ export default {
   ** Axios module configuration
   ** See https://axios.nuxtjs.org/options
   */
-  axios: {},
+  axios: { baseURL: 'https://mj2qoeavpg.execute-api.us-east-2.amazonaws.com' },
   /*
   ** Build configuration
   ** See https://nuxtjs.org/api/configuration-build/
