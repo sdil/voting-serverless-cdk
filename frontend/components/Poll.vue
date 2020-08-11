@@ -26,11 +26,21 @@ export default {
   },
   methods: {
     SubmitVote() {
+      const config = {
+        headers: {
+          Accept: 'application/json',
+        },
+      }
+
       // use axios to POST data to API Server
-      this.$axios.post(`/vote/${this.$route.params.id}`, {
-        poll: this.$route.params.id,
-        answer: this.picked
-      })
+      this.$axios.post(
+        `/vote/${this.poll.id}`,
+        {
+          poll: this.poll.id,
+          answer: this.picked,
+        },
+        config
+      )
       this.$router.push({ name: 'result-id', params: { id: this.poll.id } })
     },
   },

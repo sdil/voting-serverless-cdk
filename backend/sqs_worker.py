@@ -1,19 +1,21 @@
 # Reference: https://github.com/linuxacademy/content-dynamodb-deepdive/blob/master/6.3.3-SQS-Write-Buffer/lambda_function.py
+# Reference: https://docs.aws.amazon.com/lambda/latest/dg/with-sqs-create-package.html#with-sqs-example-deployment-pkg-python
 
 import boto3
-from botocore.exceptions import ClientError
 from datetime import datetime
 import uuid
+import logging
+from models import Vote
 import os
 from db.dynamodb import DynamoDBAdapter
+import json
 
 
-QUEUE_NAME = os.environ["VOTING_QUEUE"]
 DYNAMODB_TABLE = os.environ["POLL_TABLE"]
-
-sqs = boto3.resource("sqs")
-
 db = DynamoDBAdapter()
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 
 def insert_to_vote_db_table(event, context):
@@ -25,27 +27,17 @@ def insert_to_vote_db_table(event, context):
         "date": "2020-07-23 04:19:26.819419"
     }
     """
-    queue = sqs.get_queue_by_name(QueueName=QUEUE_NAME)
 
-    while True:
-        for message in queue.receive_messages(MaxNumberOfMessages=10):
-            print(message)
+    for message in event["Records"]:
+        logger.info(message)
 
-            vote = Vote(
-                id=uuid.uuid4(),
-                date=datetime.fromisoformat(message["date"]),
-                poll=message["poll"],
-                answer=message["answer"],
-            )
+        body = json.loads(message["body"])
 
-            try:
-                response = db.insert_vote(vote)
-                print("Wrote message to DynamoDB:", json.dumps(response))
-                message.delete()
-                print("Deleted a processed message:", message.message_id)
-            except ClientError as e:
-                print(
-                    f'{e.response["Error"]["Code"]}: {e.response["Error"]["Message"]}'
-                )
-            else:
-                print(response)
+        vote = Vote(
+            id=f"vote_{uuid.uuid4()}",
+            date=datetime.fromisoformat(body["date"]),
+            poll=body["poll"],
+            answer=body["answer"],
+        )
+
+        response = db.insert_vote(vote)

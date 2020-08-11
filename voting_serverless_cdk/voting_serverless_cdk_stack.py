@@ -34,47 +34,14 @@ class VotingServerlessCdkStack(core.Stack):
     def __init__(self, scope: core.Construct, id: str, **kwargs) -> None:
         super().__init__(scope, id, **kwargs)
 
-        python_deps_layer = self.create_deps_layer()
-
-        self.poll_table = None
-        self.create_ddb_tables([python_deps_layer])
-
-        self.vote_api = self.create_api_gateway("VoteHttpApi")
-        self.create_api_endpoints(self.vote_api, [python_deps_layer])
-
-        self.create_sqs_queue([python_deps_layer])
-
-        self.users = UserPool(self, "vote-user")  # make it Hosted UI
-
-        # Route53 pointing to api.voting.com
-
-    def create_api_gateway(self, name: str):
-        api = HttpApi(
-            self,
-            name,
-            cors_preflight={
-                "allow_headers": ["Authorization"],
-                "allow_methods": [
-                    HttpMethod.GET,
-                    HttpMethod.HEAD,
-                    HttpMethod.OPTIONS,
-                    HttpMethod.POST,
-                ],
-                "allow_origins": ["*"],
-                "max_age": core.Duration.days(10),
-            },
-        )
-
-        return api
-
-    def create_deps_layer(self):
         """
+        Create Lambda Layer
+
         The packages should be stored in `python/lib/python3.7/site-packages`
         which translates to `/opt/python/lib/python3.7/site-packages` in AWS Lambda
 
         Refer here: https://stackoverflow.com/a/58702328/7999204
         """
-
         python_deps_layer = LayerVersion(
             self,
             "PythonDepsLayer",
@@ -83,9 +50,9 @@ class VotingServerlessCdkStack(core.Stack):
             description="A layer that contains Python Dependencies",
         )
 
-        return python_deps_layer
-
-    def create_ddb_tables(self, deps_layer):
+        """
+        Create DynamoDB Tables
+        """
         self.poll_table = Table(
             self,
             "PollTable",
@@ -105,7 +72,7 @@ class VotingServerlessCdkStack(core.Stack):
                 handler="ddb_stream.aggregate_vote_table",
                 runtime=PYTHON_RUNTIME,
                 code=Code.asset("./backend"),
-                layers=deps_layer,
+                layers=[python_deps_layer],
             )
 
             # DynamoDB Stream (Lambda Event Source)
@@ -127,16 +94,36 @@ class VotingServerlessCdkStack(core.Stack):
         setup_ddb_streams()
         setup_gsi_table()
 
-    def create_api_endpoints(self, apigw, layers):
+        """
+        HTTP API API Gateway
+        """
+        api = HttpApi(
+            self,
+            "VoteHttpApi",
+            cors_preflight={
+                "allow_headers": ["Authorization"],
+                "allow_methods": [
+                    HttpMethod.GET,
+                    HttpMethod.HEAD,
+                    HttpMethod.OPTIONS,
+                    HttpMethod.POST,
+                ],
+                "allow_origins": ["*"],
+                "max_age": core.Duration.days(10),
+            },
+        )
 
+        """
+        HTTP API Lambda functions
+        """
         get_all_votes_function = api_lambda_function(
             self,
             "GetAllVoteLambda",
             "api.get_all_votes",
-            apigw,
+            api,
             "/vote",
             GET,
-            layers,
+            [python_deps_layer],
             [self.poll_table],
         )
         self.poll_table.grant_read_data(get_all_votes_function)
@@ -145,10 +132,10 @@ class VotingServerlessCdkStack(core.Stack):
             self,
             "GetVoteLambda",
             "api.get_vote_by_id",
-            apigw,
+            api,
             "/vote/{vote_id}",
             GET,
-            layers,
+            [python_deps_layer],
             [self.poll_table],
         )
         self.poll_table.grant_read_data(get_vote_function)
@@ -157,10 +144,10 @@ class VotingServerlessCdkStack(core.Stack):
             self,
             "CreatePollLambda",
             "api.create_poll",
-            apigw,
+            api,
             "/vote",
             POST,
-            layers,
+            [python_deps_layer],
             [self.poll_table],
         )
         self.poll_table.grant_write_data(create_poll_function)
@@ -169,41 +156,45 @@ class VotingServerlessCdkStack(core.Stack):
             self,
             "PostVoteLambda",
             "api.vote",
-            apigw,
+            api,
             "/vote/{vote_id}",
             POST,
-            layers,
+            [python_deps_layer],
             [self.poll_table],
         )
 
-    def create_sqs_queue(self, deps_layer):
-
+        """
+        Create SQS Queues
+        """
         voting_queue = Queue(self, "voting-queue")
 
-        def create_sqs_worker():
+        # SQS Consumer worker
+        voting_to_ddb_function = Function(
+            self,
+            "VotingToDDBLambda",
+            handler="sqs_worker.insert_to_vote_db_table",
+            runtime=PYTHON_RUNTIME,
+            code=Code.asset("./backend"),
+            layers=[python_deps_layer],
+        )
 
-            # SQS Consumer worker
-            voting_to_ddb_function = Function(
-                self,
-                "VotingToDDBLambda",
-                handler="sqs_worker.insert_to_vote_db_table",
-                runtime=PYTHON_RUNTIME,
-                code=Code.asset("./backend"),
-                layers=deps_layer,
-            )
+        voting_to_ddb_function.add_environment(
+            "POLL_TABLE", self.poll_table.table_name
+        )
 
-            voting_to_ddb_function.add_environment(
-                "POLL_TABLE", self.poll_table.table_name
-            )
-            voting_to_ddb_function.add_environment(
-                "VOTING_QUEUE", voting_queue.queue_name
-            )
+        # SQS Queue to Lambda trigger mapping
+        voting_to_ddb_event_source = SqsEventSource(voting_queue)
+        voting_to_ddb_function.add_event_source(voting_to_ddb_event_source)
 
-            # SQS Queue to Lambda trigger mapping
-            voting_to_ddb_event_source = SqsEventSource(voting_queue)
-            voting_to_ddb_function.add_event_source(voting_to_ddb_event_source)
+        self.poll_table.grant_read_write_data(voting_to_ddb_function)
+        voting_queue.grant_send_messages(post_vote_function)
 
-        create_sqs_worker()
+        post_vote_function.add_environment("VOTING_QUEUE_URL", voting_queue.queue_url)
+
+        self.users = UserPool(self, "vote-user")  # make it Hosted UI
+
+        # Route53 pointing to api.voting.com
+
 
 
 class VotingFrontendCdkStack(core.Stack):

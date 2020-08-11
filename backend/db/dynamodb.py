@@ -20,7 +20,6 @@ class DynamoDBAdapter(AbstractDatabase):
                 "date": poll.date.isoformat(),
                 "question": poll.question,
                 "result": dict(poll.result),
-                "user": poll.user,
                 "SK1": poll.id,
                 "PK1": poll.user,
                 "PK2": poll.id,
@@ -35,7 +34,7 @@ class DynamoDBAdapter(AbstractDatabase):
             datetime.fromisoformat(response["date"]),
             response["question"],
             response["result"],
-            response["user"],
+            response.get("user"),
         )
 
     def get_all_polls(self) -> List[Poll]:

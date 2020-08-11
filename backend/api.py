@@ -58,7 +58,7 @@ def create_poll(event, context):
     Create a new voting poll
     """
     poll = Poll(
-        uuid.uuid4(),
+        f"poll_{uuid.uuid4()}",
         datetime.now(),
         "what if cat rule the world?",
         Counter({"poops everywhere": 0, "king of love": 0}),
@@ -86,13 +86,13 @@ def vote(event, context):
     }
     """
     logger.info(event)
-    event["date"] = datetime.now().isoformat()
-
-    msg = json.dumps(event)
+    body = json.loads(event["body"])
+    body["date"] = datetime.now().isoformat()
+    msg = json.dumps(body)
 
     try:
         response = sqs.send_message(
-            QueueUrl="https://sqs.us-east-2.amazonaws.com/836476550359/voting-serverless-cdk-votingqueueD7A5A12E-1FC6Y6V1ASS3H",
+            QueueUrl=os.environ.get("VOTING_QUEUE_URL"),
             MessageBody=msg,
         )
         logging.info("MessageId: " + response["MessageId"])
