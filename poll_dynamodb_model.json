@@ -1,0 +1,236 @@
+{
+  "ModelName": "Poll",
+  "ModelMetadata": {
+    "Author": "Fadhil",
+    "DateCreated": "Jul 23, 2020, 11:40 PM",
+    "DateLastModified": "Aug 10, 2020, 10:50 PM",
+    "Description": "Poll single table design",
+    "Version": "1.0"
+  },
+  "DataModel": [
+    {
+      "TableName": "Poll",
+      "KeyAttributes": {
+        "PartitionKey": {
+          "AttributeName": "id",
+          "AttributeType": "S"
+        },
+        "SortKey": {
+          "AttributeName": "SK",
+          "AttributeType": "S"
+        }
+      },
+      "NonKeyAttributes": [
+        {
+          "AttributeName": "date",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "result",
+          "AttributeType": "M"
+        },
+        {
+          "AttributeName": "SK1",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "user_info",
+          "AttributeType": "M"
+        },
+        {
+          "AttributeName": "poll_id",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "PK1",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "question",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "PK2",
+          "AttributeType": "S"
+        }
+      ],
+      "GlobalSecondaryIndexes": [
+        {
+          "IndexName": "user",
+          "KeyAttributes": {
+            "PartitionKey": {
+              "AttributeName": "PK1",
+              "AttributeType": "S"
+            },
+            "SortKey": {
+              "AttributeName": "SK1",
+              "AttributeType": "S"
+            }
+          },
+          "Projection": {
+            "ProjectionType": "INCLUDE",
+            "NonKeyAttributes": [
+              "date",
+              "result",
+              "user_info",
+              "question",
+              "poll_id"
+            ]
+          }
+        },
+        {
+          "IndexName": "main_page",
+          "KeyAttributes": {
+            "PartitionKey": {
+              "AttributeName": "PK2",
+              "AttributeType": "S"
+            }
+          },
+          "Projection": {
+            "ProjectionType": "INCLUDE",
+            "NonKeyAttributes": [
+              "question",
+              "date",
+              "result"
+            ]
+          }
+        }
+      ],
+      "TableData": [
+        {
+          "id": {
+            "S": "uuid_poll1"
+          },
+          "SK": {
+            "S": "poll_info"
+          },
+          "date": {
+            "S": "2020-07-23 04:19:26.819419"
+          },
+          "result": {
+            "M": {
+              "choice 1": {
+                "N": "0"
+              },
+              "choice 2": {
+                "N": "0"
+              }
+            }
+          },
+          "SK1": {
+            "S": "uuid_poll1"
+          },
+          "PK1": {
+            "S": "uuid_user1"
+          },
+          "question": {
+            "S": "what if cat rule the wolrd?"
+          },
+          "PK2": {
+            "S": "uuid_poll1"
+          }
+        },
+        {
+          "id": {
+            "S": "uuid_user1"
+          },
+          "SK": {
+            "S": "user_info"
+          },
+          "date": {
+            "S": "2020-07-23 04:19:26.819419"
+          },
+          "SK1": {
+            "S": "user_info"
+          },
+          "user_info": {
+            "M": {
+              "Name": {
+                "S": "fadhil"
+              }
+            }
+          },
+          "PK1": {
+            "S": "uuid_user1"
+          }
+        },
+        {
+          "id": {
+            "S": "uuid_vote1"
+          },
+          "SK": {
+            "S": "vote#2020-07-23 04:19:26.819419"
+          },
+          "date": {
+            "S": "2020-07-23 04:19:26.819419"
+          },
+          "SK1": {
+            "S": "vote#2020-07-23 04:19:26.819419"
+          },
+          "poll_id": {
+            "S": "uuid_vote1"
+          },
+          "PK1": {
+            "S": "uuid_user1"
+          }
+        },
+        {
+          "id": {
+            "S": "uuid_vote2"
+          },
+          "SK": {
+            "S": "vote#2020-07-24 04:19:26.819419"
+          },
+          "date": {
+            "S": "2020-07-24 04:19:26.819419"
+          },
+          "SK1": {
+            "S": "vote#2020-07-24 04:19:26.819419"
+          },
+          "poll_id": {
+            "S": "uuid_vote2"
+          },
+          "PK1": {
+            "S": "uuid_user1"
+          }
+        },
+        {
+          "id": {
+            "S": "uuid_poll2"
+          },
+          "SK": {
+            "S": "poll_info"
+          },
+          "date": {
+            "S": "2020-07-23 04:19:26.819419"
+          },
+          "result": {
+            "M": {
+              "1": {
+                "N": "0"
+              },
+              "2": {
+                "N": "0"
+              }
+            }
+          },
+          "SK1": {
+            "S": "uuid_poll2"
+          },
+          "PK1": {
+            "S": "uuid_user1"
+          },
+          "question": {
+            "S": "is this a bird?"
+          },
+          "PK2": {
+            "S": "uuid_poll2"
+          }
+        }
+      ],
+      "DataAccess": {
+        "MySql": {}
+      }
+    }
+  ]
+}
