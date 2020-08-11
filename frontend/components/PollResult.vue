@@ -2,11 +2,10 @@
   <section class="section">
     <div class="columns is-mobile">
       <div class="content">
-        <h2 class="is-medium">{{ question }}</h2>
+        <h2 class="is-medium">{{ poll.question }}</h2>
 
         <ul>
-          <li>Bird</li>
-          <li>Plane</li>
+          <li v-for="(count, answer) in poll.result"> {{ answer }} : {{ count }} </li>
         </ul>
       </div>
     </div>
@@ -16,20 +15,10 @@
 <script>
 export default {
   props: {
-
-    id: {
-      type: String,
-      required: true
+    poll: {
+      type: Object,
+      required: true,
     },
-    question: {
-      type: String,
-      required: true
-    }
-  },
-  data() {
-    return {
-        radio: 'default'
-    }
   }
 }
 </script>

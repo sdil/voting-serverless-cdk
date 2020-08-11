@@ -4,7 +4,9 @@
       <div class="content">
         <b-button tag="router-link" to="create-poll" type="is-link" icon-left="vote">Create a poll</b-button>
 
-        <Poll :key="poll.id" v-bind:poll="poll" />
+        <div v-for="poll in polls">
+          <Poll :key="poll.id" v-bind:poll="poll" />
+        </div>
       </div>
     </div>
   </section>
@@ -22,7 +24,7 @@ export default {
 
   data() {
     return {
-      poll: {},
+      polls: [],
     }
   },
 
@@ -34,11 +36,10 @@ export default {
     }
     try {
       const res = await this.$axios.get(
-        '/vote/b2b546b7-5efd-4114-9c73-09f66bca519e',
+        '/vote',
         config
       )
-      console.log(res)
-      this.poll = res.data
+      this.polls = res.data
     } catch (error) {
       console.log(error)
     }

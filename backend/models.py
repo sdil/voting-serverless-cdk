@@ -18,7 +18,7 @@ class Poll:
     )
     question: str
     result: Counter[Dict[str, int]]
-    user: str
+    user: str = None
 
 
 @dataclass
@@ -29,7 +29,7 @@ class Vote:
     poll: str
     choice: int
     vote: str
-    user: str = None
+    user: str
 
 
 @dataclass
