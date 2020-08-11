@@ -2,7 +2,7 @@ from db.interface import AbstractDatabase
 import boto3
 import os
 from typing import List
-from models import Poll
+from models import Poll, Vote
 from datetime import datetime
 
 
@@ -52,3 +52,20 @@ class DynamoDBAdapter(AbstractDatabase):
             polls.append(poll)
 
         return polls
+
+    def update_poll(self, id: str, **kwargs) -> None:
+        return
+
+    def insert_vote(self, vote: Vote) -> None:
+        sk = f"vote#{vote.date.isoformat()}"
+        self.poll_table.put_item(
+            Item={
+                "id": vote.id,
+                "SK": sk,
+                "date": vote.date.isoformat(),
+                "SK1": sk,
+                "poll_id": vote.poll,
+                "pk1": vote.user,
+            }
+        )
+        return

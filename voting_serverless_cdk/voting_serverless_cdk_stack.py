@@ -192,6 +192,13 @@ class VotingServerlessCdkStack(core.Stack):
                 layers=deps_layer,
             )
 
+            voting_to_ddb_function.add_environment(
+                "POLL_TABLE", self.poll_table.table_name
+            )
+            voting_to_ddb_function.add_environment(
+                "VOTING_QUEUE", voting_queue.queue_name
+            )
+
             # SQS Queue to Lambda trigger mapping
             voting_to_ddb_event_source = SqsEventSource(voting_queue)
             voting_to_ddb_function.add_event_source(voting_to_ddb_event_source)

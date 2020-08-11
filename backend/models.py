@@ -21,15 +21,16 @@ class Poll:
     user: str = None
 
 
+@dataclass_json
 @dataclass
 class Vote:
-    __slots__ = ["id", "date", "vote", "poll", "user"]
+    __slots__ = ["id", "date", "vote", "poll"]
     id: str
     date: datetime
     poll: str
-    choice: int
+    answer: str
     vote: str
-    user: str
+    user: str = None
 
 
 @dataclass

@@ -8,15 +8,21 @@ from datetime import datetime
 
 import boto3
 from aws_xray_sdk.core import patch_all, xray_recorder
+from botocore.exceptions import ClientError
+
 
 from db.dynamodb import DynamoDBAdapter
 from models import Poll, Vote
 
+
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 patch_all()
+sqs = boto3.client("sqs")
+
 
 db = DynamoDBAdapter()
+queue_url = os.environ.get("VOTING_QUEUE_URL")
 
 
 def get_all_votes(event, context):
@@ -71,6 +77,26 @@ def create_poll(event, context):
 
 def vote(event, context):
     """
-    Publish an message to SQS queue
+    Publish an message to SQS queue.
+
+    Example message from frontend:
+    {
+        "poll": "uuid1"
+        "answer": "cat"
+    }
     """
-    pass
+    logger.info(event)
+    event["date"] = datetime.now().isoformat()
+
+    msg = json.dumps(event)
+
+    try:
+        response = sqs.send_message(
+            QueueUrl="https://sqs.us-east-2.amazonaws.com/836476550359/voting-serverless-cdk-votingqueueD7A5A12E-1FC6Y6V1ASS3H",
+            MessageBody=msg,
+        )
+        logging.info("MessageId: " + response["MessageId"])
+    except ClientError as e:
+        print(f'{e.response["Error"]["Code"]}: {e.response["Error"]["Message"]}')
+    else:
+        print(response)
