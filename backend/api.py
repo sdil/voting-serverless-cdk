@@ -56,23 +56,38 @@ def get_vote_by_id(event, context):
 def create_poll(event, context):
     """
     Create a new voting poll
+
+    Example message from frontend:
+    {
+        "question": "what is that?"
+        "choice1": "cat"
+        "choice2": "dog"
+    }
     """
+    logger.info("Creating a new poll")
+    logger.info(event)
+    body = json.loads(event["body"])
+
     poll = Poll(
         f"poll_{uuid.uuid4()}",
         datetime.now(),
-        "what if cat rule the world?",
-        Counter({"poops everywhere": 0, "king of love": 0}),
-        "user1",
+        body["question"],
+        Counter({body["choice1"]: 0, body["choice2"]: 0}),
+        "daniela andrade",
     )
     db.insert_poll(poll)
 
     msg = {
         "status": "success",
-        "headers": {"content-type": "application/json"},
         "message": f"poll {poll.id} is created",
+        "poll_id": poll.id,
     }
 
-    return {"statusCode": 200, "body": json.dumps(msg)}
+    return {
+        "statusCode": 200,
+        "headers": {"content-type": "application/json"},
+        "body": json.dumps(msg),
+    }
 
 
 def vote(event, context):
@@ -92,11 +107,21 @@ def vote(event, context):
 
     try:
         response = sqs.send_message(
-            QueueUrl=os.environ.get("VOTING_QUEUE_URL"),
-            MessageBody=msg,
+            QueueUrl=os.environ.get("VOTING_QUEUE_URL"), MessageBody=msg,
         )
         logging.info("MessageId: " + response["MessageId"])
     except ClientError as e:
         print(f'{e.response["Error"]["Code"]}: {e.response["Error"]["Message"]}')
     else:
         print(response)
+
+    msg = {
+        "status": "success",
+        "message": f"vote is created",
+    }
+
+    return {
+        "statusCode": 200,
+        "headers": {"content-type": "application/json"},
+        "body": json.dumps(msg),
+    }

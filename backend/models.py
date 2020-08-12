@@ -4,6 +4,7 @@ from dataclasses_json import dataclass_json, config
 from datetime import datetime
 from marshmallow import fields
 
+
 @dataclass_json
 @dataclass
 class Poll:

@@ -95,7 +95,7 @@ class VotingServerlessCdkStack(core.Stack):
         setup_gsi_table()
 
         """
-        HTTP API API Gateway
+        HTTP API API Gateway with CORS
         """
         api = HttpApi(
             self,
@@ -178,9 +178,7 @@ class VotingServerlessCdkStack(core.Stack):
             layers=[python_deps_layer],
         )
 
-        voting_to_ddb_function.add_environment(
-            "POLL_TABLE", self.poll_table.table_name
-        )
+        voting_to_ddb_function.add_environment("POLL_TABLE", self.poll_table.table_name)
 
         # SQS Queue to Lambda trigger mapping
         voting_to_ddb_event_source = SqsEventSource(voting_queue)
@@ -194,7 +192,6 @@ class VotingServerlessCdkStack(core.Stack):
         self.users = UserPool(self, "vote-user")  # make it Hosted UI
 
         # Route53 pointing to api.voting.com
-
 
 
 class VotingFrontendCdkStack(core.Stack):

@@ -28,7 +28,7 @@ export default {
     SubmitVote() {
       const config = {
         headers: {
-          Accept: 'application/json',
+          Accept: 'application/json'
         },
       }
 

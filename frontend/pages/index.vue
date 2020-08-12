@@ -35,10 +35,7 @@ export default {
       },
     }
     try {
-      const res = await this.$axios.get(
-        '/vote',
-        config
-      )
+      const res = await this.$axios.get('/vote', config)
       this.polls = res.data
     } catch (error) {
       console.log(error)

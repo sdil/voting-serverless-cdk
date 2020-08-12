@@ -56,10 +56,10 @@ class DynamoDBAdapter(AbstractDatabase):
         return
 
     def insert_vote(self, vote: Vote) -> None:
-        sk = f"vote#{vote.date.isoformat()}"
+        sk = f"{vote.id}#{vote.date.isoformat()}"
         self.poll_table.put_item(
             Item={
-                "id": vote.id,
+                "id": vote.poll,
                 "SK": sk,
                 "date": vote.date.isoformat(),
                 "SK1": sk,
