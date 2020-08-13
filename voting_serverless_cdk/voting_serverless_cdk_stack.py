@@ -53,7 +53,7 @@ class VotingServerlessCdkStack(core.Stack):
         """
         Create DynamoDB Tables
         """
-        self.poll_table = Table(
+        poll_table = Table(
             self,
             "PollTable",
             partition_key=Attribute(name="id", type=AttributeType.STRING),
@@ -63,36 +63,33 @@ class VotingServerlessCdkStack(core.Stack):
             stream=StreamViewType.NEW_IMAGE,
         )
 
-        def setup_ddb_streams():
+        # DynamoDB Lambda consumer worker
+        aggregate_votes_function = Function(
+            self,
+            "AggregateVotesLambda",
+            handler="ddb_stream.aggregate_vote_table",
+            runtime=PYTHON_RUNTIME,
+            code=Code.asset("./backend"),
+            layers=[python_deps_layer],
+            timeout=core.Duration.seconds(30)
+        )
+        aggregate_votes_function.add_environment("POLL_TABLE", poll_table.table_name)
 
-            # DynamoDB Lambda consumer worker
-            aggregate_votes_function = Function(
-                self,
-                "AggregateVotesLambda",
-                handler="ddb_stream.aggregate_vote_table",
-                runtime=PYTHON_RUNTIME,
-                code=Code.asset("./backend"),
-                layers=[python_deps_layer],
-            )
+        # DynamoDB Stream (Lambda Event Source)
+        poll_table.grant_stream_read(aggregate_votes_function)
+        poll_table.grant_read_write_data(aggregate_votes_function)
+        ddb_aggregate_votes_event_source = DynamoEventSource(
+            poll_table, starting_position=StartingPosition.LATEST
+        )
+        aggregate_votes_function.add_event_source(ddb_aggregate_votes_event_source)
 
-            # DynamoDB Stream (Lambda Event Source)
-            self.poll_table.grant_stream_read(aggregate_votes_function)
-            self.poll_table.grant_read_write_data(aggregate_votes_function)
-            ddb_aggregate_votes_event_source = DynamoEventSource(
-                self.poll_table, starting_position=StartingPosition.LATEST
-            )
-            aggregate_votes_function.add_event_source(ddb_aggregate_votes_event_source)
-
-        def setup_gsi_table():
-            self.poll_table.add_global_secondary_index(
-                partition_key=Attribute(name="PK2", type=AttributeType.STRING),
-                projection_type=ProjectionType.INCLUDE,
-                index_name=MAIN_PAGE_GSI,
-                non_key_attributes=["date", "question", "result"],
-            )
-
-        setup_ddb_streams()
-        setup_gsi_table()
+        # DynamoDB main_page GSI
+        poll_table.add_global_secondary_index(
+            partition_key=Attribute(name="PK2", type=AttributeType.STRING),
+            projection_type=ProjectionType.INCLUDE,
+            index_name=MAIN_PAGE_GSI,
+            non_key_attributes=["date", "question", "result"],
+        )
 
         """
         HTTP API API Gateway with CORS
@@ -101,7 +98,7 @@ class VotingServerlessCdkStack(core.Stack):
             self,
             "VoteHttpApi",
             cors_preflight={
-                "allow_headers": ["Authorization"],
+                "allow_headers": ["*"],
                 "allow_methods": [
                     HttpMethod.GET,
                     HttpMethod.HEAD,
@@ -124,9 +121,9 @@ class VotingServerlessCdkStack(core.Stack):
             "/vote",
             GET,
             [python_deps_layer],
-            [self.poll_table],
+            [poll_table],
         )
-        self.poll_table.grant_read_data(get_all_votes_function)
+        poll_table.grant_read_data(get_all_votes_function)
 
         get_vote_function = api_lambda_function(
             self,
@@ -136,9 +133,9 @@ class VotingServerlessCdkStack(core.Stack):
             "/vote/{vote_id}",
             GET,
             [python_deps_layer],
-            [self.poll_table],
+            [poll_table],
         )
-        self.poll_table.grant_read_data(get_vote_function)
+        poll_table.grant_read_data(get_vote_function)
 
         create_poll_function = api_lambda_function(
             self,
@@ -148,9 +145,9 @@ class VotingServerlessCdkStack(core.Stack):
             "/vote",
             POST,
             [python_deps_layer],
-            [self.poll_table],
+            [poll_table],
         )
-        self.poll_table.grant_write_data(create_poll_function)
+        poll_table.grant_write_data(create_poll_function)
 
         post_vote_function = api_lambda_function(
             self,
@@ -160,7 +157,7 @@ class VotingServerlessCdkStack(core.Stack):
             "/vote/{vote_id}",
             POST,
             [python_deps_layer],
-            [self.poll_table],
+            [poll_table],
         )
 
         """
@@ -178,17 +175,20 @@ class VotingServerlessCdkStack(core.Stack):
             layers=[python_deps_layer],
         )
 
-        voting_to_ddb_function.add_environment("POLL_TABLE", self.poll_table.table_name)
+        voting_to_ddb_function.add_environment("POLL_TABLE", poll_table.table_name)
 
         # SQS Queue to Lambda trigger mapping
         voting_to_ddb_event_source = SqsEventSource(voting_queue)
         voting_to_ddb_function.add_event_source(voting_to_ddb_event_source)
 
-        self.poll_table.grant_read_write_data(voting_to_ddb_function)
+        poll_table.grant_read_write_data(voting_to_ddb_function)
         voting_queue.grant_send_messages(post_vote_function)
 
         post_vote_function.add_environment("VOTING_QUEUE_URL", voting_queue.queue_url)
 
+        """
+        Create AWS Cognito User Pool
+        """
         self.users = UserPool(self, "vote-user")  # make it Hosted UI
 
         # Route53 pointing to api.voting.com

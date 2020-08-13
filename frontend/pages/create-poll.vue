@@ -20,7 +20,7 @@
         <b-input v-model="choice2" placeholder="Loud purr" name="question" expanded></b-input>
       </b-field>
 
-      <b-button type="is-dark" @click="SubmitPoll()">Submit</b-button>
+      <b-button type="is-dark" @click="CreatePoll()">Submit</b-button>
     </div>
   </section>
 </template>
@@ -36,11 +36,10 @@ export default {
     }
   },
   methods: {
-    SubmitPoll() {
+    CreatePoll() {
       const config = {
         headers: {
-          Accept: 'application/json',
-          Origin: 'localhost.com'
+          Accept: 'application/json'
         },
       }
 
