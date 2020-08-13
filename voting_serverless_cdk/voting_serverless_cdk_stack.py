@@ -14,9 +14,10 @@ from aws_cdk.aws_cognito import UserPool
 from aws_cdk.aws_s3 import Bucket
 from aws_cdk.aws_cloudfront import (
     CloudFrontWebDistribution,
-    S3OriginConfig,
+    CustomOriginConfig,
     SourceConfiguration,
     Behavior,
+    OriginProtocolPolicy
 )
 from aws_cdk.aws_s3_deployment import BucketDeployment, Source
 from utils import api_lambda_function
@@ -71,7 +72,7 @@ class VotingServerlessCdkStack(core.Stack):
             runtime=PYTHON_RUNTIME,
             code=Code.asset("./backend"),
             layers=[python_deps_layer],
-            timeout=core.Duration.seconds(30)
+            timeout=core.Duration.seconds(30),
         )
         aggregate_votes_function.add_environment("POLL_TABLE", poll_table.table_name)
 
@@ -191,7 +192,9 @@ class VotingServerlessCdkStack(core.Stack):
         """
         self.users = UserPool(self, "vote-user")  # make it Hosted UI
 
-        # Route53 pointing to api.voting.com
+        core.CfnOutput(self, "api-domain", value=api.url)
+
+        # Manually setup the DNS to point to api.voting.com with the CNAME of above
 
 
 class VotingFrontendCdkStack(core.Stack):
@@ -205,20 +208,23 @@ class VotingFrontendCdkStack(core.Stack):
             public_read_access=True,
         )
 
+        # CloudFront Origin should be S3 DNS name, not the S3 bucket itself
+        # Otherwise, the CloudFront cannot serve dynamic pages (eg. /vote/{id} page)
+        # https://stackoverflow.com/a/59359038/7999204
+
         frontend_distribution = CloudFrontWebDistribution(
             self,
             "frontend-cdn",
             origin_configs=[
                 SourceConfiguration(
-                    s3_origin_source=S3OriginConfig(s3_bucket_source=frontend_bucket),
+                    custom_origin_source=CustomOriginConfig(
+                        domain_name=frontend_bucket.bucket_domain_name,
+                        origin_protocol_policy=OriginProtocolPolicy.HTTP_ONLY
+                    ),
                     behaviors=[Behavior(is_default_behavior=True)],
                 )
             ],
         )
-
-        # CloudFront Origin should be S3 DNS name, not the S3 bucket itself
-        # Otherwise, the CloudFront cannot serve dynamic pages (eg. /vote/{id} page)
-        # https://stackoverflow.com/a/59359038/7999204
 
         BucketDeployment(
             self,
@@ -233,4 +239,6 @@ class VotingFrontendCdkStack(core.Stack):
             self, "cdn-domain", value=frontend_distribution.distribution_domain_name
         )
 
-        # Route53 pointing to www.voting.com
+        # Manually setup the DNS to point to www.voting.com with the CNAME of above
+
+        #manually setup SSL Cert (using ACM)

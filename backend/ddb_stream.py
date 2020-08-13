@@ -25,7 +25,7 @@ def aggregate_vote_table(event, context):
     for record in event["Records"]:
         logger.info(record)
 
-        if record['eventName'] != "INSERT":
+        if record["eventName"] != "INSERT":
             # If it's other operation other than INSERT, ignore it
             continue
 
@@ -45,7 +45,7 @@ def aggregate_vote_table(event, context):
 
         except KeyError:
             polls[d["poll_id"]] = db.get_poll(d["poll_id"])
-            
+
         # Increase the result count
         polls[d["id"]].result[d["answer"]] += 1
 
