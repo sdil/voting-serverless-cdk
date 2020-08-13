@@ -17,7 +17,8 @@ from aws_cdk.aws_cloudfront import (
     CustomOriginConfig,
     SourceConfiguration,
     Behavior,
-    OriginProtocolPolicy
+    OriginProtocolPolicy,
+    CfnDistribution
 )
 from aws_cdk.aws_s3_deployment import BucketDeployment, Source
 from utils import api_lambda_function
@@ -201,10 +202,16 @@ class VotingFrontendCdkStack(core.Stack):
     def __init__(self, scope: core.Construct, id: str, **kwargs) -> None:
         super().__init__(scope, id, **kwargs)
 
+        # The error page should be index.html as well
+        # so that it can trigger NuxtJS routing
+        # when the using is opening using direct permalink
+        # Reference: https://stackoverflow.com/a/47554827
+
         frontend_bucket = Bucket(
             self,
             "frontend",
             website_index_document="index.html",
+            website_error_document="index.html",
             public_read_access=True,
         )
 
@@ -215,11 +222,19 @@ class VotingFrontendCdkStack(core.Stack):
         frontend_distribution = CloudFrontWebDistribution(
             self,
             "frontend-cdn",
+            error_configurations=[
+                CfnDistribution.CustomErrorResponseProperty(
+                  error_caching_min_ttl=0,
+                  error_code=403,
+                  response_code=200,
+                  response_page_path="/index.html"
+              )
+            ],
             origin_configs=[
                 SourceConfiguration(
                     custom_origin_source=CustomOriginConfig(
                         domain_name=frontend_bucket.bucket_domain_name,
-                        origin_protocol_policy=OriginProtocolPolicy.HTTP_ONLY
+                        origin_protocol_policy=OriginProtocolPolicy.HTTP_ONLY,
                     ),
                     behaviors=[Behavior(is_default_behavior=True)],
                 )
@@ -241,4 +256,4 @@ class VotingFrontendCdkStack(core.Stack):
 
         # Manually setup the DNS to point to www.voting.com with the CNAME of above
 
-        #manually setup SSL Cert (using ACM)
+        # manually setup SSL Cert (using ACM)

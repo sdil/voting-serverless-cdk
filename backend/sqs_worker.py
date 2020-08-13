@@ -29,10 +29,9 @@ def insert_to_vote_db_table(event, context):
     """
 
     for message in event["Records"]:
+        
         logger.info(message)
-
         body = json.loads(message["body"])
-
         vote = Vote(
             id=f"vote_{uuid.uuid4()}",
             date=datetime.fromisoformat(body["date"]),
@@ -41,3 +40,4 @@ def insert_to_vote_db_table(event, context):
         )
 
         response = db.insert_vote(vote)
+        logger.info(f"inserted vote {vote.id} to dynamodb")
