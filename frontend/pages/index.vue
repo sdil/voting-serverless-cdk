@@ -2,7 +2,12 @@
   <section class="section">
     <div class="columns is-mobile">
       <div class="content">
-        <b-button tag="router-link" to="create-poll" type="is-link" icon-left="vote">Create a poll</b-button>
+        <div v-if="$auth.isAuthenticated">
+          <b-button tag="router-link" to="create-poll" type="is-link" icon-left="vote">Create a poll</b-button>
+        </div>
+        <div v-else>
+          <strong>Please login to create your own poll</strong>
+        </div>
 
         <div v-for="poll in polls">
           <Poll :key="poll.id" v-bind:poll="poll" />

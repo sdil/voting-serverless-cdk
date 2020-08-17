@@ -28,6 +28,8 @@ Why am I doing this? I am learning AWS and serverless technology. This is my fir
 - **[AWS API Gateway]** It's almost impossible to write a API Doc for AWS API Gateway HTTP API, so use REST API if you planning to have one.
 - **[AWS Lambda]** In order to setup Python deps packages, you have to use Lambda Layer where it will be mounted in `/opt/` in actual Lambda function. For Python 3.8, you have to put the files in `./python/lib/python3.8/site-packages/` so that the Lambda function can use the packages correctly.
 - **[NuxtJS]** You cannot write a `<nuxt-link>` in `<b-navbar>` tag. It will cause a hydration issue. Use this instead: `<b-navbar-item tag="router-link" :to="{ path: '/' }">`.
+- **[NuxtJS]** Refer [here](https://www.youtube.com/watch?v=fzcG5Oe31bo) for tutorial on how to build a AWS Cognito integration with Nuxt JS.
+- **[NuxtJS]** I tried to use Amplify Auth Vue UI Component for frontend to authenticate user, however, the page is not reactive and slows down the system. The UI Component is somehow big and make the web app bloated.
 
 ## Contributing
 

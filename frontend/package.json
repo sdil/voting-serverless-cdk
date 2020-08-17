@@ -10,7 +10,11 @@
     "serve": "nuxt serve"
   },
   "dependencies": {
+    "@aws-amplify/ui-components": "^0.6.1",
+    "@aws-amplify/ui-vue": "^0.2.13",
     "@nuxtjs/axios": "^5.11.0",
+    "amazon-cognito-identity-js": "^4.3.3",
+    "aws-amplify": "^3.0.23",
     "nuxt": "^2.13.3",
     "nuxt-buefy": "^0.3.31"
   },

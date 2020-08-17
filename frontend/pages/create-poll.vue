@@ -39,6 +39,7 @@ export default {
     CreatePoll() {
       const config = {
         headers: {
+          Authorization: 'Bearer testtest',
           Accept: 'application/json'
         },
       }
