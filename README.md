@@ -8,13 +8,16 @@ This is a simple voting app built using Serverless stack in AWS CDK.
 Generally the application is built in [Jamstack architecture](https://jamstack.wtf). The frontend is a VueJS + NuxtJS application served from **AWS CloudFront** (CDN) and **AWS S3** (Origin). The API Server is built in FaaS model. It consist of:
 
 - **API Gateway (HTTP API)** for traffic routing
-- **Lambda** functions for each endpoints
+- **AWS Lambda** functions for each endpoints
+- **AWS Lambda Layer** to setup Python dependencies
 - **AWS Cognito** as identity provider
 - **DynamoDB** tables for data persistence
 - **DynamoDB Streams** & consumer worker to update aggregated-vote DynamoDB table
-- **SQS Queue** in the middle to theoretically withstand high number of request per second of voting endpoint so that DynamoDB will not be throttled
+- **SQS Queue** in the middle to theoretically withstand high number of request per second of voting endpoint so that DynamoDB will not be throttled & lost.
 - **X-Ray** for distributed tracing
-- **Route53** for DNS routing *(TODO)*
+- **S3** for frontend static hosting
+- **Cloudfront** for frontend static caching
+- **AWS Certificate Manager** to manage SSL certs
 
 This architecture is intentionally made in more sophisticated way for me to touch more AWS services.
 
