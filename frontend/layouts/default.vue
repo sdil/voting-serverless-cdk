@@ -24,7 +24,7 @@
           <div v-else>
             <div class="buttons">
               <nuxt-link class="button is-primary" to="/register">
-                <strong>Registe</strong>
+                <strong>Register</strong>
               </nuxt-link>
               <nuxt-link class="button is-light" to="/login">Log in</nuxt-link>
             </div>
