@@ -31,6 +31,22 @@ Why am I doing this? I am learning AWS and serverless technology. This is my fir
 - **[NuxtJS]** Refer [here](https://www.youtube.com/watch?v=fzcG5Oe31bo) for tutorial on how to build a AWS Cognito integration with Nuxt JS.
 - **[NuxtJS]** I tried to use Amplify Auth Vue UI Component for frontend to authenticate user, however, the page is not reactive and slows down the system. The UI Component is somehow big and make the web app bloated.
 - **[AWS API Gateway HTTP API]** Refer [here](https://auth0.com/blog/securing-aws-http-apis-with-jwt-authorizers/#Add-a-JWT-Authorizer-to-Your-API) on how to secure HTTP API with JWT authorizer.
+- **[AWS API Gateway]** Generally, it's better to use API Gateway REST API instead of HTTP API but remember to use all the extra you get out of it like request mapper (to SQS, DynamoDB, etc.) with Apache VTL, request/response validation, caching, API doc, API keys, request transformation, edge-optimized, AWS WAF protection, etc.
+
+## Manual Setup (out of CDK)
+
+- Domain setup in Namecheap
+- SSL cert request from AWS Cert Manager (ACM)
+- AWS API Gateway HTTP API request authorizer. AWS CDK seems to be lacking on this as of now (Aug 2020) and there's no method to properly set this up in apigatewayv2 class.
+
+## Things can be improved
+
+/* not necessarily to be done.
+
+- Unittests on all modules
+- Better error handling in NuxtJS & Python code
+- Write API doc (manually)
+- A more flexible way to add answers in frontend
 
 ## Contributing
 

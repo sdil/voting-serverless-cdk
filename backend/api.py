@@ -67,13 +67,14 @@ def create_poll(event, context):
     logger.info("Creating a new poll")
     logger.info(event)
     body = json.loads(event["body"])
+    authorizer = event["requestContext"]["authorizer"]["jwt"]
 
     poll = Poll(
         f"poll_{uuid.uuid4()}",
         datetime.now(),
         body["question"],
         Counter({body["choice1"]: 0, body["choice2"]: 0}),
-        "daniela andrade",
+        authorizer["claims"]["username"],
     )
     db.insert_poll(poll)
 
