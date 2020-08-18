@@ -26,18 +26,18 @@ Why am I doing this? I am learning AWS and serverless technology. This is my fir
 
 - **[AWS CloudFront]** When deploying SSR websites on CloudFront, you cannot point the origin to S3 Bucket. Instead, you have to point the origin to S3 DNS name (eg. `<bucket>.s3-website.us-east-2.amazonaws.com`) as Custom Origin, not S3 Origin.
 - **[AWS API Gateway]** It's almost impossible to write a API Doc for AWS API Gateway HTTP API, so use REST API if you planning to have one.
+- **[AWS API Gateway]** Generally, it's better to use API Gateway REST API instead of HTTP API but remember to use all the extra you get out of it like request mapper (to SQS, DynamoDB, etc.) with Apache VTL, request/response validation, caching, API doc, API keys, request transformation, edge-optimized, AWS WAF protection, etc.
+- **[AWS API Gateway HTTP API]** Refer [here](https://auth0.com/blog/securing-aws-http-apis-with-jwt-authorizers/#Add-a-JWT-Authorizer-to-Your-API) on how to secure HTTP API with JWT authorizer.
 - **[AWS Lambda]** In order to setup Python deps packages, you have to use Lambda Layer where it will be mounted in `/opt/` in actual Lambda function. For Python 3.8, you have to put the files in `./python/lib/python3.8/site-packages/` so that the Lambda function can use the packages correctly.
 - **[NuxtJS]** You cannot write a `<nuxt-link>` in `<b-navbar>` tag. It will cause a hydration issue. Use this instead: `<b-navbar-item tag="router-link" :to="{ path: '/' }">`.
 - **[NuxtJS]** Refer [here](https://www.youtube.com/watch?v=fzcG5Oe31bo) for tutorial on how to build a AWS Cognito integration with Nuxt JS.
 - **[NuxtJS]** I tried to use Amplify Auth Vue UI Component for frontend to authenticate user, however, the page is not reactive and slows down the system. The UI Component is somehow big and make the web app bloated.
-- **[AWS API Gateway HTTP API]** Refer [here](https://auth0.com/blog/securing-aws-http-apis-with-jwt-authorizers/#Add-a-JWT-Authorizer-to-Your-API) on how to secure HTTP API with JWT authorizer.
-- **[AWS API Gateway]** Generally, it's better to use API Gateway REST API instead of HTTP API but remember to use all the extra you get out of it like request mapper (to SQS, DynamoDB, etc.) with Apache VTL, request/response validation, caching, API doc, API keys, request transformation, edge-optimized, AWS WAF protection, etc.
 
 ## Manual Setup (out of CDK)
 
 - Domain setup in Namecheap
 - SSL cert request from AWS Cert Manager (ACM)
-- AWS API Gateway HTTP API request authorizer. AWS CDK seems to be lacking on this as of now (Aug 2020) and there's no method to properly set this up in apigatewayv2 class.
+- AWS API Gateway HTTP API request authorizer. AWS CDK seems to be lacking on this as of now (Aug 2020). There's no method to properly set this up in apigatewayv2 class.
 
 ## Things can be improved
 
@@ -47,6 +47,14 @@ Why am I doing this? I am learning AWS and serverless technology. This is my fir
 - Better error handling in NuxtJS & Python code
 - Write API doc (manually)
 - A more flexible way to add answers in frontend
+- CI/CD setup
+- E2E testing
+- Tune the AWS Lambda and choose the right-size Lambda
+- Optimize the DynamoDB table (read Alex Debrie's book)
+
+## Demo
+
+Reserved for demo
 
 ## Contributing
 
