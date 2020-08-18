@@ -6,6 +6,15 @@ export default {
   */
   mode: 'spa',
   /*
+  ** Environment variables
+  ** See https://nuxtjs.org/api/configuration-env/
+  */
+  env: {
+    webClientId: process.env.WEB_CLIENT_ID || '',
+    userPoolId: process.env.USER_POOL_ID || 'us-east-2_fB1o1P4TV',
+    cognitoRegion: process.env.COGNITO_REGION || '',
+  },
+  /*
   ** Nuxt target
   ** See https://nuxtjs.org/api/configuration-target
   */

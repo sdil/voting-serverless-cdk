@@ -29,7 +29,7 @@ def insert_to_vote_db_table(event, context):
     """
 
     for message in event["Records"]:
-        
+
         logger.info(message)
         body = json.loads(message["body"])
         vote = Vote(

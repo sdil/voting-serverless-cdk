@@ -18,7 +18,7 @@ from aws_cdk.aws_cloudfront import (
     SourceConfiguration,
     Behavior,
     OriginProtocolPolicy,
-    CfnDistribution
+    CfnDistribution,
 )
 from aws_cdk.aws_s3_deployment import BucketDeployment, Source
 from utils import api_lambda_function
@@ -224,11 +224,11 @@ class VotingFrontendCdkStack(core.Stack):
             "frontend-cdn",
             error_configurations=[
                 CfnDistribution.CustomErrorResponseProperty(
-                  error_caching_min_ttl=0,
-                  error_code=403,
-                  response_code=200,
-                  response_page_path="/index.html"
-              )
+                    error_caching_min_ttl=0,
+                    error_code=403,
+                    response_code=200,
+                    response_page_path="/index.html",
+                )
             ],
             origin_configs=[
                 SourceConfiguration(
