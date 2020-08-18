@@ -94,6 +94,11 @@ class VotingServerlessCdkStack(core.Stack):
         )
 
         """
+        Create AWS Cognito User Pool
+        """
+        self.users = UserPool(self, "vote-user")
+
+        """
         HTTP API API Gateway with CORS
         """
         api = HttpApi(
@@ -187,11 +192,6 @@ class VotingServerlessCdkStack(core.Stack):
         voting_queue.grant_send_messages(post_vote_function)
 
         post_vote_function.add_environment("VOTING_QUEUE_URL", voting_queue.queue_url)
-
-        """
-        Create AWS Cognito User Pool
-        """
-        self.users = UserPool(self, "vote-user")  # make it Hosted UI
 
         core.CfnOutput(self, "api-domain", value=api.url)
 
