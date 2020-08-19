@@ -49,6 +49,8 @@ Reserved for demo
 - Support pagination on polls listing in main page
 - Tune the AWS Lambda and choose the right-size Lambda
 - Optimize the DynamoDB table (read [Alex Debrie's book](https://www.dynamodbbook.com/))
+- Add monitoring & alerting (refer [this article](https://lumigo.io/blog/what-alerts-should-you-have-for-serverless-applications/) by Yan Chui)
+- Use [AWS Lambda Powertools](https://github.com/awslabs/aws-lambda-powertools-python) for logging, tracing & metrics
 
 ## Personal Takeways / Lesson Learned
 
