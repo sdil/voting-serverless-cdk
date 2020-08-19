@@ -62,40 +62,20 @@ Reserved for demo
 
 ## Deploy On Your AWS
 
-Start a Python virtualenv
-
 ```
+# Start a Python virtualenv
 $ python3 -m venv .env
-```
 
-After the init process completes and the virtualenv is created, you can use the following
-step to activate your virtualenv.
-
-```
+# Activate the virtualenv
 $ source .env/bin/activate
-```
 
-If you are a Windows platform, you would activate the virtualenv like this:
-
-```
-% .env\Scripts\activate.bat
-```
-
-Once the virtualenv is activated, you can install the required dependencies.
-
-```
+# Once the virtualenv is activated, you can install the required dependencies.
 $ pip install -r requirements.txt
-```
 
-At this point you can now synthesize the CloudFormation template for this code.
-
-```
+# At this point you can now synthesize the CloudFormation template for this code.
 $ cdk synth
-```
 
-Install Python dependencies for Lambda Layer
-
-```
+# Install Python dependencies for Lambda Layer
 $ make install-python-deps
 ```
 
@@ -107,11 +87,13 @@ Deploy the CDK
 $ cdk deploy *
 ```
 
-Refer [Manual Setup](#manual-setup-out-of-cdk) section to setup on your
+Refer [Manual Setup](#manual-setup-out-of-cdk) section to setup on your services outside of CDK.
 
 Enjoy!
 
 ## References
+
+Thanks to these articles that helped me to make this project reality.
 
 - [How to add authentication using AWS Amplify's Auth Class in a Nuxt app (Auth Part 1)](https://www.youtube.com/watch?v=fzcG5Oe31bo) by jagr.co. How to use a AWS Amplify Auth (Cognito) in Nuxt JS.
 - [User management in Vue.js with AWS Cognito](https://medium.com/js-dojo/user-management-in-vue-js-with-aws-cognito-1905511b93b) by Christopher Bartling. How to fetch AWS Cognito signed in user token & refresh it when it's expiring.
