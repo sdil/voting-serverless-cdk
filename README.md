@@ -29,7 +29,7 @@ Why am I doing this? I am learning AWS and serverless technology. This is my fir
 
 - **[AWS CloudFront]** When deploying SSR websites on CloudFront, you cannot point the origin to S3 Bucket. Instead, you have to point the origin to S3 DNS name (eg. `<bucket>.s3-website.us-east-2.amazonaws.com`) as Custom Origin, not S3 Origin.
 - **[AWS API Gateway]** It's almost impossible to write a API Doc for AWS API Gateway HTTP API, so use REST API if you planning to have one.
-- **[AWS API Gateway]** Generally, it's better to use API Gateway REST API instead of HTTP API but remember to use all the extra you get out of it like request mapper (to SQS, DynamoDB, etc.) with Apache VTL, request/response validation, caching, API doc, API keys, request transformation, edge-optimized, AWS WAF protection, etc.
+- **[AWS API Gateway]** Generally, it's better to use API Gateway REST API instead of HTTP API but remember to use all the extra you get out of it like request mapper (to SQS, DynamoDB, etc.) with Apache VTL, request/response validation, caching, API doc, API keys, request transformation, edge-optimized, throttling, AWS WAF protection, etc.
 - **[AWS API Gateway HTTP API]** Refer [here](https://auth0.com/blog/securing-aws-http-apis-with-jwt-authorizers/#Add-a-JWT-Authorizer-to-Your-API) on how to secure HTTP API with JWT authorizer.
 - **[AWS Lambda]** In order to setup Python deps packages, you have to use Lambda Layer where it will be mounted in `/opt/` in actual Lambda function. For Python 3.8, you have to put the files in `./python/lib/python3.8/site-packages/` so that the Lambda function can use the packages correctly.
 - **[NuxtJS]** You cannot write a `<nuxt-link>` in `<b-navbar>` tag. It will cause a hydration issue. Use this instead: `<b-navbar-item tag="router-link" :to="{ path: '/' }">`.
@@ -48,11 +48,13 @@ Why am I doing this? I am learning AWS and serverless technology. This is my fir
 - Unittests on all modules
 - Better error handling in NuxtJS & Python code
 - Write API doc (manually)
-- A more flexible way to add answers in frontend
-- CI/CD setup
+- Support multiple answer choices when creating poll
+- CI/CD setup. Currently I'm pushing to prod from CDK CLI
 - E2E testing
+- Support all CRUD operations
+- Support pagination on polls listing in main page
 - Tune the AWS Lambda and choose the right-size Lambda
-- Optimize the DynamoDB table (read Alex Debrie's book)
+- Optimize the DynamoDB table (read [Alex Debrie's book](https://www.dynamodbbook.com/))
 
 ## Demo
 
@@ -63,7 +65,7 @@ Reserved for demo
 - [How to add authentication using AWS Amplify's Auth Class in a Nuxt app (Auth Part 1)](https://www.youtube.com/watch?v=fzcG5Oe31bo) by jagr.co. How to use a AWS Amplify Auth (Cognito) in Nuxt JS.
 - [User management in Vue.js with AWS Cognito](https://medium.com/js-dojo/user-management-in-vue-js-with-aws-cognito-1905511b93b) by Christopher Bartling. How to fetch AWS Cognito signed in user token & refresh it when it's expiring.
 
-## Contributing
+## Deploy On Your AWS
 
 Start a Python virtualenv
 
@@ -96,16 +98,20 @@ At this point you can now synthesize the CloudFormation template for this code.
 $ cdk synth
 ```
 
-To add additional dependencies, for example other CDK libraries, just add
-them to your `setup.py` file and rerun the `pip install -r requirements.txt`
-command.
+Install Python dependencies for Lambda Layer
 
-## Useful commands
+```
+$ make install-python-deps
+```
 
- * `cdk ls`          list all stacks in the app
- * `cdk synth`       emits the synthesized CloudFormation template
- * `cdk deploy`      deploy this stack to your default AWS account/region
- * `cdk diff`        compare deployed stack with current state
- * `cdk docs`        open CDK documentation
+Replace the variables in `./frontend/.env.sample` and save it as `./frontend/.env`
+
+Deploy the CDK
+
+```
+$ cdk deploy *
+```
+
+Refer [Manual Setup](#manual-setup) section to setup on your
 
 Enjoy!
