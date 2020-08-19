@@ -1,3 +1,4 @@
+import { CognitoRefreshToken } from 'amazon-cognito-identity-js';
 import { Auth, loadingBar } from 'aws-amplify';
 
 export const state = () => ({
@@ -13,13 +14,25 @@ export const mutations = {
 }
 
 export const actions = {
-    async load({ commit }) {
+    async load({ dispatch }) {
+        await dispatch('fetchUser')
+    },
+    async fetchUser({commit, dispatch}) {
+        // This will fetch the user details and store it in `user` state
+        // This will fetch the user again after the token expires
+
         try {
-            const user = await Auth.currentAuthenticatedUser();
-            commit('set', user);
-            return user;
-        } catch (error) {
-            commit('set', null)
+            const user = await Auth.currentAuthenticatedUser()
+            const expires = user.getSignInUserSession().getIdToken().payload.exp - Math.floor(new Date().getTime() / 1000)
+            console.log(`Token expires in ${expires} seconds`)
+            setTimeout(async () => {
+                console.log('Renewing Token')
+                await dispatch('fetchUser')
+            }, expires * 1000)
+            commit('set', user)
+        } catch (err) {
+            console.log("no user logged in")
+            commit('user', null)
         }
     },
     async register(_, { email, password }) {
@@ -36,9 +49,9 @@ export const actions = {
         return await Auth.confirmSignUp(email, code);
     },
 
-    async login({ commit }, { email, password }) {
+    async login({ dispatch }, { email, password }) {
         const user = await Auth.signIn(email, password)
-        commit('set', user)
+        await dispatch('fetchUser')
         return user
     },
 

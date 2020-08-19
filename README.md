@@ -33,7 +33,6 @@ Why am I doing this? I am learning AWS and serverless technology. This is my fir
 - **[AWS API Gateway HTTP API]** Refer [here](https://auth0.com/blog/securing-aws-http-apis-with-jwt-authorizers/#Add-a-JWT-Authorizer-to-Your-API) on how to secure HTTP API with JWT authorizer.
 - **[AWS Lambda]** In order to setup Python deps packages, you have to use Lambda Layer where it will be mounted in `/opt/` in actual Lambda function. For Python 3.8, you have to put the files in `./python/lib/python3.8/site-packages/` so that the Lambda function can use the packages correctly.
 - **[NuxtJS]** You cannot write a `<nuxt-link>` in `<b-navbar>` tag. It will cause a hydration issue. Use this instead: `<b-navbar-item tag="router-link" :to="{ path: '/' }">`.
-- **[NuxtJS]** Refer [here](https://www.youtube.com/watch?v=fzcG5Oe31bo) for tutorial on how to build a AWS Cognito integration with Nuxt JS.
 - **[NuxtJS]** I tried to use Amplify Auth Vue UI Component for frontend to authenticate user, however, the page is not reactive and slows down the system. The UI Component is somehow big and make the web app bloated.
 
 ## Manual Setup (out of CDK)
@@ -58,6 +57,11 @@ Why am I doing this? I am learning AWS and serverless technology. This is my fir
 ## Demo
 
 Reserved for demo
+
+## References
+
+- [How to add authentication using AWS Amplify's Auth Class in a Nuxt app (Auth Part 1)](https://www.youtube.com/watch?v=fzcG5Oe31bo) by jagr.co. How to use a AWS Amplify Auth (Cognito) in Nuxt JS.
+- [User management in Vue.js with AWS Cognito](https://medium.com/js-dojo/user-management-in-vue-js-with-aws-cognito-1905511b93b) by Christopher Bartling. How to fetch AWS Cognito signed in user token & refresh it when it's expiring.
 
 ## Contributing
 

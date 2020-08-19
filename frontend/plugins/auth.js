@@ -17,6 +17,11 @@ class AuthService {
         if (!this.user) return;
         return this.user.attributes.email;
     }
+
+    get accessToken() {
+        if (!this.user) return;
+        return this.user.signInUserSession.accessToken.jwtToken;
+    }
 }
 
 export default async ({ store }) => {

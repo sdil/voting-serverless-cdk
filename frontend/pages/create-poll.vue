@@ -39,7 +39,7 @@ export default {
     CreatePoll() {
       const config = {
         headers: {
-          Authorization: 'Bearer testtest',
+          Authorization: `Bearer ${this.$auth.accessToken}`,
           Accept: 'application/json'
         },
       }
