@@ -47,8 +47,9 @@ Reserved for benchmark
 ## Manual Setup (out of CDK)
 
 - Domain setup in Namecheap
-- SSL cert request from AWS Cert Manager (ACM)
+- SSL cert request from AWS Cert Manager (ACM). It require manual CNAME setup for domain verification from ACM.
 - AWS API Gateway HTTP API request authorizer. AWS CDK seems to be lacking on this as of now (Aug 2020). There's no method to properly set this up in apigatewayv2 class.
+- X-Ray setup
 
 ## Things can be improved
 
@@ -74,9 +75,9 @@ Reserved for benchmark
 - **[AWS CloudFront]** When deploying SSR websites on CloudFront, you cannot point the origin to S3 Bucket. Instead, you have to point the origin to S3 DNS name (eg. `<bucket>.s3-website.us-east-2.amazonaws.com`) as Custom Origin, not S3 Origin.
 - **[AWS API Gateway]** It's almost impossible to write an API Doc for AWS API Gateway HTTP API, so use REST API if you planning to have one.
 - **[AWS API Gateway]** Generally, it's better to use API Gateway REST API instead of HTTP API but remember to use all the extra you get out of it like request mapper (to SQS, DynamoDB, etc.) with Apache VTL, request/response validation, caching, API doc, API keys, request transformation, edge-optimized, throttling, AWS WAF protection, etc.
-- **[AWS API Gateway HTTP API]** Refer [here](https://auth0.com/blog/securing-aws-http-apis-with-jwt-authorizers/#Add-a-JWT-Authorizer-to-Your-API) on how to secure HTTP API with JWT authorizer.
+- **[AWS API Gateway HTTP API]** 
 - **[AWS Lambda]** In order to setup Python deps packages, you have to use Lambda Layer where it will be mounted in `/opt/` in an actual Lambda function. For Python 3.8, you have to put the files in `./python/lib/python3.8/site-packages/` so that the Lambda function can use the packages correctly.
-- **[AWS Lambda & AWS API Gateway]** The `event` payload from API Gateway contains a lot more data than you expected. Always test E2E by invoking the Lambda function from API Gateway to see the full data.
+- **[AWS Lambda & AWS API Gateway]** The `event` payload from API Gateway contains a lot more data than I expected. Always test E2E by invoking the Lambda function from API Gateway to see the full data.
 - **[NuxtJS]** You cannot write a `<nuxt-link>` in `<b-navbar>` tag. It will cause a hydration issue. Use this instead: `<b-navbar-item tag="router-link" :to="{ path: '/' }">`.
 - **[NuxtJS]** I tried to use Amplify Auth Vue UI Component for frontend to authenticate user, however, the page is not reactive and slows down the system. The UI Component is somehow big and make the web app bloated.
 
@@ -99,7 +100,7 @@ $ cdk synth
 $ make install-python-deps
 
 # Move .env.sample file to .env
-mv ./frontend/.env.sample ./frontend/.env
+$ mv ./frontend/.env.sample ./frontend/.env
 ```
 
 Replace the variables in `./frontend/.env`
@@ -120,3 +121,4 @@ Thanks to these articles that helped me to make this project reality.
 
 - [How to add authentication using AWS Amplify's Auth Class in a Nuxt app (Auth Part 1)](https://www.youtube.com/watch?v=fzcG5Oe31bo) by jagr.co. How to use a AWS Amplify Auth (Cognito) in Nuxt JS.
 - [User management in Vue.js with AWS Cognito](https://medium.com/js-dojo/user-management-in-vue-js-with-aws-cognito-1905511b93b) by Christopher Bartling. How to fetch AWS Cognito signed in user token & refresh it when it's expiring.
+- [How to secure HTTP API with JWT authorizer](https://auth0.com/blog/securing-aws-http-apis-with-jwt-authorizers/#Add-a-JWT-Authorizer-to-Your-API) by Auth0.
