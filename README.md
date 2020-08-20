@@ -8,18 +8,29 @@ This is a simple voting app built using Serverless stack in AWS CDK.
 Generally the application is built in [Jamstack architecture](https://jamstack.wtf). The frontend is a VueJS + NuxtJS application served from **AWS CloudFront** (CDN) and **AWS S3** (Origin). The API Server is built in FaaS model. It consist of:
 
 - **API Gateway (HTTP API)** for traffic routing
-- **AWS Lambda** functions for each endpoints
+- **AWS Lambda** functions for each endpoint
 - **AWS Lambda Layer** to setup Python dependencies
-- **AWS Cognito** as identity provider
+- **AWS Cognito** as an identity provider
 - **DynamoDB** tables for data persistence
 - **DynamoDB Streams** & consumer worker to update aggregated-vote DynamoDB table
-- **SQS Queue** in the middle to theoretically withstand high number of request per second of voting endpoint so that DynamoDB will not be throttled & lost.
+- **SQS Queue** in the middle to withstand high number of request per second of voting endpoint so that DynamoDB will not be throttled & lost.
 - **X-Ray** for distributed tracing
 - **S3** for frontend static hosting
 - **Cloudfront** for frontend static caching
 - **AWS Certificate Manager** to manage SSL certs
 
-This architecture is intentionally made in more sophisticated way for me to touch more AWS services.
+This architecture is intentionally made in a more sophisticated way for me to touch more AWS services.
+
+# Table of Contents
+
+- [Motivation](#motivation)
+- [Demo](#demo)
+- [Benchmark](#benchmakr)
+- [Manual Setup (out of CDK)](#manual-setup-out-of-cdk)
+- [Things can be improved](#things-can-be-improved)
+- [Personal Takeaways / Lesson Learned](#personal-takeaways--lesson-learned)
+- [Deploy on Your AWS Account](#deploy-on-your-aws)
+- [References](#references)
 
 ## Motivation
 
@@ -28,6 +39,10 @@ Why am I doing this? I am learning AWS and serverless technology. This is my fir
 ## Demo
 
 Reserved for demo
+
+## Benchmark
+
+Reserved for benchmark
 
 ## Manual Setup (out of CDK)
 
@@ -39,7 +54,7 @@ Reserved for demo
 
 \* not necessarily to be done.
 
-- Unittests on all modules
+- Write unit tests on all modules
 - Local testing to test the API & integration with AWS services
 - Benchmark the API performance
 - Better error handling in NuxtJS & Python code
@@ -48,13 +63,13 @@ Reserved for demo
 - CI/CD setup. Currently I'm pushing to prod from CDK CLI
 - E2E testing
 - Support all CRUD operations
-- Support pagination on polls listing in main page
+- Support pagination on polls listing on the main page
 - Tune the AWS Lambda and choose the right-size Lambda
 - Optimize the DynamoDB table (read [Alex Debrie's book](https://www.dynamodbbook.com/))
 - Add monitoring & alerting (refer [this article](https://lumigo.io/blog/what-alerts-should-you-have-for-serverless-applications/) by Yan Chui)
 - Use [AWS Lambda Powertools](https://github.com/awslabs/aws-lambda-powertools-python) for logging, tracing & metrics
 
-## Personal Takeways / Lesson Learned
+## Personal Takeaways / Lesson Learned
 
 - **[AWS CloudFront]** When deploying SSR websites on CloudFront, you cannot point the origin to S3 Bucket. Instead, you have to point the origin to S3 DNS name (eg. `<bucket>.s3-website.us-east-2.amazonaws.com`) as Custom Origin, not S3 Origin.
 - **[AWS API Gateway]** It's almost impossible to write an API Doc for AWS API Gateway HTTP API, so use REST API if you planning to have one.
@@ -65,7 +80,7 @@ Reserved for demo
 - **[NuxtJS]** You cannot write a `<nuxt-link>` in `<b-navbar>` tag. It will cause a hydration issue. Use this instead: `<b-navbar-item tag="router-link" :to="{ path: '/' }">`.
 - **[NuxtJS]** I tried to use Amplify Auth Vue UI Component for frontend to authenticate user, however, the page is not reactive and slows down the system. The UI Component is somehow big and make the web app bloated.
 
-## Deploy On Your AWS
+## Deploy on Your AWS Account
 
 ```
 # Start a Python virtualenv
@@ -82,9 +97,12 @@ $ cdk synth
 
 # Install Python dependencies for Lambda Layer
 $ make install-python-deps
+
+# Move .env.sample file to .env
+mv ./frontend/.env.sample ./frontend/.env
 ```
 
-Replace the variables in `./frontend/.env.sample` and save it as `./frontend/.env`
+Replace the variables in `./frontend/.env`
 
 Deploy the CDK
 
