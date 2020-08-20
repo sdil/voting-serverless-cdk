@@ -3,6 +3,8 @@
 
 This is a simple voting app built using Serverless stack in AWS CDK.
 
+See me building this app in public in this [Twitter thread](https://twitter.com/sdil/status/1284816892301959168).
+
 <a href="https://raw.githubusercontent.com/sdil/voting-serverless-cdk/master/architecture.png"><img src="https://raw.githubusercontent.com/sdil/voting-serverless-cdk/master/architecture.png" height="600" width="485" ></a>
 
 Generally the application is built in [Jamstack architecture](https://jamstack.wtf). The frontend is a VueJS + NuxtJS application served from **AWS CloudFront** (CDN) and **AWS S3** (Origin). The API Server is built in FaaS model. It consist of:
